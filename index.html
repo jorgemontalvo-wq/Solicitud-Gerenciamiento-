@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGI Tecknologistic · Guía de Remisión</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+:root{
+  --red:#c1272d; --red-dark:#8f1a1f; --gray:#4a4a4a; --gray-light:#f4f4f5;
+  --border:#d9d9dc; --ok:#1e8e3e; --warn:#c1272d; --bg:#ffffff;
+}
+*{box-sizing:border-box;}
+body{font-family:'Segoe UI',Arial,sans-serif;color:#222;background:var(--gray-light);margin:0;padding:12px;}
+.wrap{max-width:820px;margin:0 auto;}
+.topbar{display:flex;justify-content:space-between;align-items:center;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:10px;flex-wrap:wrap;gap:8px;}
+.topbar img{height:34px;}
+.topbar .sub{font-size:11px;color:#777;letter-spacing:.03em;}
+.status-pill{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;color:#fff;}
+.status-borrador{background:#c98a00;}
+.status-emitida{background:var(--ok);}
+.status-anulada{background:#888;}
+.status-none{background:#aaa;}
+.doc{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:visible;}
+.doc-head{display:flex;justify-content:space-between;align-items:flex-start;padding:14px 16px;border-bottom:3px solid var(--red);}
+.doc-head img{height:46px;}
+.folio-box{border:2px solid var(--red);border-radius:6px;padding:6px 12px;text-align:right;min-width:170px;}
+.folio-box .lbl{font-size:10px;color:#777;text-transform:uppercase;letter-spacing:.05em;}
+.folio-box .num{font-size:20px;font-weight:800;color:var(--red);}
+.folio-box .date{font-size:12px;color:#444;margin-top:2px;}
+.section-title{background:var(--red);color:#fff;font-weight:700;font-size:12.5px;letter-spacing:.04em;text-transform:uppercase;padding:6px 14px;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+.field{border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:8px 12px;}
+.field:nth-child(2n){border-right:none;}
+.field label{display:block;font-size:10.5px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.03em;margin-bottom:3px;}
+.field input, .field select, .field textarea{width:100%;border:none;border-bottom:1px solid transparent;padding:3px 0;font-size:14.5px;background:transparent;font-family:inherit;color:#222;}
+.field input:focus, .field select:focus, .field textarea:focus{outline:none;border-bottom:1px solid var(--red);}
+.field input:read-only, .field textarea:read-only{color:#333;background:#fbfbfb;}
+.field input:disabled, .field select:disabled{color:#333;background:#fbfbfb;opacity:1;-webkit-text-fill-color:#333;}
+.full{grid-column:1/3;}
+.sellos-wrap{display:grid;grid-template-columns:1fr 1fr;}
+.sellos-wrap .col{border-right:1px solid var(--border);}
+.sellos-wrap .col:last-child{border-right:none;}
+table.mini{width:100%;border-collapse:collapse;font-size:13px;}
+table.mini th{background:#fafafa;font-size:10px;text-transform:uppercase;color:#777;padding:5px 8px;text-align:left;border-bottom:1px solid var(--border);}
+table.mini td{padding:4px 8px;border-bottom:1px solid #eee;}
+table.mini td input{width:100%;border:none;background:transparent;font-size:13.5px;padding:2px 0;}
+table.mini td input:focus{outline:none;border-bottom:1px solid var(--red);}
+.summary-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;}
+.summary-row .field{text-align:center;}
+.summary-row .val{font-size:17px;font-weight:800;color:var(--red-dark);}
+.badge{display:inline-block;margin-top:4px;font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:10px;color:#fff;}
+.badge.ok{background:var(--ok);} .badge.warn{background:var(--warn);}
+.sig-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px;}
+.sig-box{border:1px solid var(--border);border-radius:8px;padding:8px;}
+.sig-box .name{font-size:11px;font-weight:700;color:#555;text-transform:uppercase;margin-bottom:4px;}
+.sig-box input{width:100%;border:none;border-bottom:1px solid #ddd;font-size:13px;padding:2px 0;margin-bottom:6px;}
+.sig-box input:focus{outline:none;border-bottom:1px solid var(--red);}
+canvas.sigpad{width:100%;height:70px;border:1px dashed #ccc;border-radius:6px;background:#fdfdfd;touch-action:none;}
+.sig-tools{display:flex;justify-content:flex-end;margin-top:3px;}
+.sig-tools button{font-size:10px;border:none;background:none;color:var(--red);cursor:pointer;text-decoration:underline;padding:0;}
+.actions{display:flex;flex-wrap:wrap;gap:8px;padding:14px;background:#fafafa;}
+.actions button{flex:1;min-width:130px;padding:11px 8px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid var(--red);background:#fff;color:var(--red);}
+.actions button.primary{background:var(--red);color:#fff;}
+.actions button:disabled{opacity:.4;cursor:not-allowed;}
+.actions button:active:not(:disabled){transform:scale(.98);}
+.note{font-size:11px;color:#888;padding:0 14px 12px;line-height:1.5;}
+.tol-row{display:flex;align-items:center;gap:6px;padding:8px 14px;font-size:12px;color:#666;background:#fafafa;border-top:1px solid var(--border);}
+.tol-row input{width:55px;border:1px solid var(--border);border-radius:4px;padding:2px 4px;}
+@media(max-width:600px){.grid,.sellos-wrap,.sig-grid,.summary-row{grid-template-columns:1fr!important;}
+ .field{border-right:none!important;}
+ .doc-head{flex-direction:column;gap:10px;} .folio-box{text-align:left;width:100%;}}
+.printing .actions, .printing .no-print, .printing .sig-tools{display:none!important;}
+@media print{
+  body{background:#fff;padding:0;}
+  .topbar, .actions, .no-print, .sig-tools{display:none!important;}
+  .wrap{max-width:100%;}
+  .doc{border:none;}
+  .field input:disabled, .field select:disabled{opacity:1;color:#222;-webkit-text-fill-color:#222;}
+}
+.doc-status-title{font-size:10.5px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px;}
+.doc-status{font-size:11.5px;padding:5px 9px;border-radius:6px;margin-bottom:3px;}
+.doc-status.green{background:#e6f4ea;color:#1e8e3e;}
+.doc-status.yellow{background:#fff8e1;color:#a66a00;}
+.doc-status.red{background:#fdecea;color:#c1272d;font-weight:700;}
+.doc-status.pend{background:#eee;color:#777;}
+.doc-status.empty{background:#f5f5f5;color:#999;font-style:italic;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <img id="logoTop" alt="Tecknologistic">
+      <div class="sub">SISTEMA DE GESTIÓN INTEGRADO · CONTROL DE COMBUSTIBLE · GUÍA DE REMISIÓN</div>
+    </div>
+    <div id="statusPill" class="status-pill status-none">SIN INICIAR</div>
+  </div>
+
+  <div id="alertaCumplimiento" style="display:none;background:#fdecea;border:2px solid var(--red);color:var(--red-dark);font-weight:700;font-size:12.5px;padding:10px 14px;border-radius:8px;margin-bottom:10px;"></div>
+
+  <div class="doc" id="documento">
+    <div class="doc-head">
+      <div>
+        <img id="logoDoc" alt="Tecknologistic">
+        <div style="font-size:11px;color:#666;margin-top:2px;">Trading industrial y Procura Global</div>
+      </div>
+      <div class="folio-box">
+        <div class="lbl">Guía de Remisión N°</div>
+        <div class="num" id="folioDisplay">— / —</div>
+        <div class="date" id="fechaDisplay">Sin emitir</div>
+        <div id="storageNote" style="font-size:9.5px;color:#c98a00;margin-top:3px;"></div>
+        <div class="no-print"><button type="button" onclick="cambiarDeviceCode()" style="font-size:9.5px;border:none;background:none;color:#999;text-decoration:underline;cursor:pointer;padding:0;margin-top:2px;">cambiar código de equipo</button></div>
+      </div>
+    </div>
+
+    <div class="section-title">Guía de Remisión Interna</div>
+    <div class="grid">
+      <div class="field"><label>Fecha de inicio de traslado</label><input type="date" id="f_fecha"></div>
+      <div class="field"><label>Hora de inicio</label><input type="time" id="f_hora"></div>
+      <div class="field"><label>Punto de partida</label><input type="text" id="f_partida" placeholder="Planta / Terminal de carga"></div>
+      <div class="field"><label>Punto de llegada</label><input type="text" id="f_llegada" placeholder="Estación / Cliente destino"></div>
+      <div class="field"><label>Tipo de producto</label>
+        <select id="f_producto">
+          <option value="">Seleccione…</option>
+          <option>Diésel 2</option>
+          <option>Diésel 2 (trasvase)</option>
+        </select>
+      </div>
+      <div class="field"><label>Temperatura de despacho (°C)</label><input type="number" id="f_temp" step="0.1" placeholder="Ej. 28.5"></div>
+    </div>
+
+    <div class="section-title">Ruta Alterna (si hubo desvío de la ruta establecida)</div>
+    <div class="grid">
+      <div class="field full" style="border-bottom:none;">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <input type="checkbox" id="f_ruta_alterna_check" style="width:auto;" onchange="toggleRutaAlterna()">
+          ¿La unidad tomó una ruta diferente a la establecida (Partida → Llegada) registrada arriba?
+        </label>
+      </div>
+      <div class="field full" id="rutaAlternaBox" style="display:none;border-top:1px solid var(--border);">
+        <label>Detalle de la ruta real seguida / motivo del desvío</label>
+        <textarea id="f_ruta_alterna_detalle" rows="2" placeholder="Ej. Vía Loreto bloqueada por derrumbe, se tomó ruta por Coca-Auca. Autorizado por..."></textarea>
+        <div class="no-print" style="margin-top:8px;">
+          <button type="button" onclick="registrarCambioRuta()" style="font-size:12px;padding:8px 12px;border:1px solid var(--red);border-radius:6px;background:#fff;color:var(--red);cursor:pointer;">Registrar cambio de ruta (queda en el historial de auditoría)</button>
+          <span id="rutaAlternaNota" style="font-size:10.5px;color:#888;display:block;margin-top:4px;"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Datos de la Unidad de Transporte</div>
+    <div class="grid">
+      <div class="field"><label>Conductor</label>
+        <select id="f_conductor"><option value="">Seleccione conductor…</option></select>
+      </div>
+      <div class="field"><label>Cédula / ID conductor</label><input type="text" id="f_conductor_id" readonly></div>
+      <div class="field"><label>Ayudante</label><input type="text" id="f_ayudante"></div>
+      <div class="field"><label>N° G.V. (Guía de Válvula / Unidad)</label><input type="text" id="f_gv"></div>
+      <div class="field"><label>Empresa (conductor)</label>
+        <select id="f_empresa_conductor">
+          <option value="">Seleccione…</option>
+          <option>TNO</option><option>CETSO</option><option>SHIGAVITRANS</option><option>FRONTERAMAZ</option><option>TRANSCAIMAN</option>
+        </select>
+      </div>
+      <div class="field"></div>
+      <div class="field full" style="border-top:none;"><div id="statusConductor"></div></div>
+      <div class="field"><label>Placa</label>
+        <select id="f_placa"><option value="">Seleccione placa…</option></select>
+      </div>
+      <div class="field"><label>N° Orden de despacho (cliente)</label><input type="text" id="f_orden"></div>
+      <div class="field"><label>Volumen de despacho aprobado (GL)</label><input type="number" id="f_vol_aprobado" step="0.01"></div>
+      <div class="field"><label>Capacidad de la unidad (GL)</label>
+        <select id="f_capacidad_matriz">
+          <option value="">Seleccione…</option>
+          <option>2.000 gl</option><option>6.000 gl</option><option>10.000 gl</option>
+        </select>
+      </div>
+      <div class="field"><label>Empresa (unidad)</label>
+        <select id="f_empresa_placa">
+          <option value="">Seleccione…</option>
+          <option>TNO</option><option>CETSO</option><option>SHIGAVITRANS</option><option>FRONTERAMAZ</option><option>TRANSCAIMAN</option>
+        </select>
+      </div>
+      <div class="field"></div>
+      <div class="field full" style="border-top:none;"><div id="statusPlaca"></div></div>
+      <div class="field"><label>Contador desde</label><input type="number" id="f_cont_desde" step="0.01"></div>
+      <div class="field"><label>Contador hasta</label><input type="number" id="f_cont_hasta" step="0.01"></div>
+      <div class="field full"><label>Volumen despachado (por contador) — calculado</label><input type="text" id="f_vol_contador" readonly></div>
+    </div>
+
+    <div class="section-title">Sellos</div>
+    <div class="sellos-wrap">
+      <div class="col">
+        <table class="mini"><thead><tr><th style="width:40%">N° de Compartimento (Manhole)</th><th>N° de Sello</th></tr></thead>
+          <tbody id="sellosManholeBody"></tbody>
+        </table>
+      </div>
+      <div class="col">
+        <table class="mini"><thead><tr><th style="width:40%">N° de Válvulas de Descarga</th><th>N° de Sello</th></tr></thead>
+          <tbody id="sellosValvulaBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section-title">Control de Volumen (Varillado)</div>
+    <div class="sellos-wrap">
+      <div class="col" style="border-right:1px solid var(--border);">
+        <table class="mini"><thead><tr><th style="width:26%">N° Compart.</th><th style="width:37%">Altura varilla (cm)</th><th>Cantidad (GL)</th></tr></thead>
+          <tbody id="volumenBody"></tbody>
+        </table>
+        <div id="calibNota" style="font-size:10px;color:#888;padding:4px 8px;"></div>
+      </div>
+      <div class="col">
+        <div class="field" style="border-bottom:1px solid var(--border);"><label>Volumen varillado total (GL) — calculado</label><input type="text" id="f_varillado_total" readonly></div>
+        <div class="field" style="border-bottom:1px solid var(--border);"><label>Volumen reportado en Excel / sistema (GL)</label><input type="number" id="f_vol_excel" step="0.01"></div>
+        <div class="field"><label>Variación vs. contador / vs. reportado</label>
+          <input type="text" id="f_variacion" readonly>
+          <div><span class="badge" id="badgeVariacion">—</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="tol-row">
+      Tolerancia de variación aceptada: <b>±0,5%</b> (fija)
+      <input type="hidden" id="f_tolerancia" value="0.5">
+      <span style="color:#aaa;">(estándar de referencia en transporte de combustibles líquidos — mermas por dilatación térmica)</span>
+    </div>
+
+    <div class="section-title">Esquema de la Unidad — Compartimentos</div>
+    <div style="padding:12px 16px;background:#fbfbfb;">
+      <svg viewBox="0 0 620 190" style="width:100%;max-width:620px;display:block;margin:0 auto;">
+        <!-- ejes / suelo -->
+        <line x1="10" y1="170" x2="610" y2="170" stroke="#ccc" stroke-width="2"/>
+        <!-- cabina -->
+        <path d="M10,170 L10,110 L55,110 L75,80 L100,80 L100,170 Z" fill="#e9e9ea" stroke="#555" stroke-width="2"/>
+        <circle cx="30" cy="170" r="14" fill="#fff" stroke="#555" stroke-width="2"/>
+        <circle cx="30" cy="170" r="5" fill="#555"/>
+        <rect x="60" y="88" width="30" height="20" fill="#cfe3f7" stroke="#555" stroke-width="1.5"/>
+        <!-- tanque -->
+        <rect x="100" y="95" width="470" height="65" rx="32" fill="#f2f2f3" stroke="#555" stroke-width="2.5"/>
+        <!-- separadores de compartimentos -->
+        <line x1="217.5" y1="97" x2="217.5" y2="158" stroke="#888" stroke-width="1.5"/>
+        <line x1="335" y1="97" x2="335" y2="158" stroke="#888" stroke-width="1.5"/>
+        <line x1="452.5" y1="97" x2="452.5" y2="158" stroke="#888" stroke-width="1.5"/>
+        <!-- numeros de manhole (compartimento) -->
+        <circle cx="158" cy="80" r="12" fill="#c1272d" stroke="#8f1a1f" stroke-width="1.5"/>
+        <text x="158" y="85" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">1</text>
+        <circle cx="276" cy="80" r="12" fill="#c1272d" stroke="#8f1a1f" stroke-width="1.5"/>
+        <text x="276" y="85" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">2</text>
+        <circle cx="393" cy="80" r="12" fill="#c1272d" stroke="#8f1a1f" stroke-width="1.5"/>
+        <text x="393" y="85" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">3</text>
+        <circle cx="511" cy="80" r="12" fill="#c1272d" stroke="#8f1a1f" stroke-width="1.5"/>
+        <text x="511" y="85" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">4</text>
+        <!-- etiquetas de volumen por compartimento (se actualizan al escribir en la tabla de Volumen Manhole) -->
+        <rect x="128" y="102" width="60" height="16" rx="3" fill="#fff" stroke="#c1272d" stroke-width="1"/>
+        <text id="volLabel1" x="158" y="114" text-anchor="middle" font-size="11" font-weight="700" fill="#8f1a1f">0 GL</text>
+        <rect x="246" y="102" width="60" height="16" rx="3" fill="#fff" stroke="#c1272d" stroke-width="1"/>
+        <text id="volLabel2" x="276" y="114" text-anchor="middle" font-size="11" font-weight="700" fill="#8f1a1f">0 GL</text>
+        <rect x="363" y="102" width="60" height="16" rx="3" fill="#fff" stroke="#c1272d" stroke-width="1"/>
+        <text id="volLabel3" x="393" y="114" text-anchor="middle" font-size="11" font-weight="700" fill="#8f1a1f">0 GL</text>
+        <rect x="481" y="102" width="60" height="16" rx="3" fill="#fff" stroke="#c1272d" stroke-width="1"/>
+        <text id="volLabel4" x="511" y="114" text-anchor="middle" font-size="11" font-weight="700" fill="#8f1a1f">0 GL</text>
+        <!-- valvulas de descarga inferiores -->
+        <rect x="140" y="158" width="14" height="14" fill="#888" stroke="#444"/>
+        <rect x="258" y="158" width="14" height="14" fill="#888" stroke="#444"/>
+        <rect x="375" y="158" width="14" height="14" fill="#888" stroke="#444"/>
+        <rect x="493" y="158" width="14" height="14" fill="#888" stroke="#444"/>
+        <!-- ejes traseros -->
+        <circle cx="440" cy="170" r="14" fill="#fff" stroke="#555" stroke-width="2"/><circle cx="440" cy="170" r="5" fill="#555"/>
+        <circle cx="500" cy="170" r="14" fill="#fff" stroke="#555" stroke-width="2"/><circle cx="500" cy="170" r="5" fill="#555"/>
+        <circle cx="560" cy="170" r="14" fill="#fff" stroke="#555" stroke-width="2"/><circle cx="560" cy="170" r="5" fill="#555"/>
+      </svg>
+      <div style="text-align:center;font-size:10.5px;color:#888;margin-top:4px;">Camión cisterna — 4 compartimentos (manhole) con válvulas de descarga individuales</div>
+    </div>
+
+    <div class="section-title">Observaciones / Novedades</div>
+    <div class="field full" style="border:none;">
+      <textarea id="f_obs" rows="2" placeholder="Derrames, retrasos, anomalías en sellos, rechazos, etc."></textarea>
+    </div>
+
+    <div class="section-title">Estado y Responsables</div>
+    <div class="grid">
+      <div class="field"><label>Estado de la guía</label>
+        <select id="f_estado">
+          <option>Pendiente</option><option>En tránsito</option><option>Entregado conforme</option><option>Entregado con novedad</option><option>Anulada</option>
+        </select>
+      </div>
+      <div class="field"><label>Logístico responsable</label><input type="text" id="f_logistico"></div>
+    </div>
+
+    <div class="section-title">Firmas</div>
+    <div class="sig-grid">
+      <div class="sig-box"><div class="name">Liberado por</div><input type="text" id="fn_liberado" placeholder="Nombre"><canvas class="sigpad" id="sig_liberado"></canvas><div class="sig-tools"><button type="button" onclick="clearSig('sig_liberado')">Limpiar firma</button></div></div>
+      <div class="sig-box"><div class="name">Supervisor</div><input type="text" id="fn_supervisor" placeholder="Nombre"><canvas class="sigpad" id="sig_supervisor"></canvas><div class="sig-tools"><button type="button" onclick="clearSig('sig_supervisor')">Limpiar firma</button></div></div>
+      <div class="sig-box"><div class="name">Ayudante</div><input type="text" id="fn_ayudante2" placeholder="Nombre"><canvas class="sigpad" id="sig_ayudante"></canvas><div class="sig-tools"><button type="button" onclick="clearSig('sig_ayudante')">Limpiar firma</button></div></div>
+      <div class="sig-box"><div class="name">Conductor</div><input type="text" id="fn_conductor2" placeholder="Nombre"><canvas class="sigpad" id="sig_conductor"></canvas><div class="sig-tools"><button type="button" onclick="clearSig('sig_conductor')">Limpiar firma</button></div></div>
+    </div>
+
+    <div class="actions no-print">
+      <button class="primary" id="btnNueva" onclick="nuevaGuia()">+ Nueva Guía</button>
+      <button id="btnGuardar" onclick="guardarGuia()" disabled>Guardar y Emitir</button>
+      <button id="btnAnular" onclick="anularGuia()" disabled>Anular</button>
+      <button id="btnExcel" onclick="exportExcel()">Exportar Excel (esta guía)</button>
+      <button id="btnPdf" onclick="exportPdf()">Exportar PDF</button>
+      <button id="btnPrint" onclick="window.print()">Imprimir / Guardar PDF (nativo)</button>
+      <button id="btnEmail" onclick="enviarEmail()">Enviar por Email</button>
+      <button id="btnConsolidado" onclick="exportConsolidadoExcel()">Exportar Consolidado (Excel)</button>
+      <button id="btnVerificar" onclick="verificarConsolidado()">Verificar Integridad</button>
+      <button id="btnExportJson" onclick="exportarJSON()">Exportar JSON</button>
+      <button id="btnImportJson" onclick="document.getElementById('jsonFileInput').click()">Importar JSON</button>
+      <input type="file" id="jsonFileInput" accept=".json,application/json" style="display:none" onchange="importarJSON(event)">
+    </div>
+    <div class="note no-print" id="consolidadoNote"></div>
+    <div class="note no-print">
+      La numeración se asigna automáticamente y de forma consecutiva al presionar <b>+ Nueva Guía</b>, quedando reservada de forma permanente aunque el formulario se abra desde otro celular, tablet o computadora. Una vez presionado <b>Guardar y Emitir</b>, el número y la fecha quedan bloqueados y no pueden editarse. El botón <b>Enviar por Email</b> descarga el PDF final y abre tu app de correo con el asunto y resumen listos — debes adjuntar el PDF descargado manualmente, ya que un documento de este tipo no puede adjuntar archivos de forma automática por razones de seguridad del navegador.
+    </div>
+  </div>
+</div>
+
+<script>
+// --- Matriz de Conductores y Tanqueros (Google Drive: "Matriz De Conductores Y Tanqueros") ---
+const calibracionTanqueros = {
+  'KAA-1756': { compartimentos: [
+    [[0.0,0.0],[1.0,10.9],[2.0,21.9],[3.0,32.8],[4.0,43.8],[5.0,54.7],[6.0,65.6],[7.0,76.6],[8.0,87.5],[9.0,98.5],[10.0,109.4],[11.0,120.4],[12.0,131.3],[13.0,142.2],[14.0,153.2],[15.0,164.1],[16.0,175.1],[17.0,186.0],[18.0,196.9],[19.0,207.9],[20.0,218.8],[21.0,229.8],[22.0,240.7],[23.0,251.6],[24.0,262.6],[25.0,273.5],[26.0,284.5],[27.0,295.4],[28.0,306.3],[29.0,317.3],[30.0,328.2],[31.0,339.2],[32.0,350.1],[33.0,361.1],[34.0,372.0],[35.0,382.9],[36.0,393.9],[37.0,404.8],[38.0,415.8],[39.0,426.7],[40.0,437.6],[41.0,448.6],[42.0,459.5],[43.0,470.5],[44.0,481.4],[45.0,492.3],[45.7,500.0],[46.0,505.6],[47.0,524.2],[48.0,542.8],[49.0,561.3],[50.0,579.9],[51.0,598.5],[52.0,617.1],[53.0,635.7],[54.0,654.3],[55.0,672.9],[56.0,691.4],[57.0,710.0],[58.0,728.6],[59.0,747.2],[60.0,765.8],[61.0,784.4],[62.0,803.0],[63.0,821.6],[64.0,840.1],[65.0,858.7],[66.0,877.3],[67.0,895.9],[68.0,914.5],[69.0,933.1],[70.0,951.7],[71.0,970.3],[72.0,988.8],[72.6,1000.0],[73.0,1007.6],[74.0,1026.6],[75.0,1045.6],[76.0,1064.6],[77.0,1083.7],[78.0,1102.7],[79.0,1121.7],[80.0,1140.7],[81.0,1159.7],[82.0,1178.7],[83.0,1197.7],[84.0,1216.7],[85.0,1235.7],[86.0,1254.8],[87.0,1273.8],[88.0,1292.8],[89.0,1311.8],[90.0,1330.8],[91.0,1349.8],[92.0,1368.8],[93.0,1387.8],[94.0,1406.8],[95.0,1425.9],[96.0,1444.9],[97.0,1463.9],[98.0,1482.9],[98.9,1500.0],[99.0,1501.6],[100.0,1518.1],[101.0,1534.5],[102.0,1550.9],[103.0,1567.3],[104.0,1583.8],[105.0,1600.2],[106.0,1616.6],[107.0,1633.0],[108.0,1649.5],[109.0,1665.9],[110.0,1682.3],[111.0,1698.7],[112.0,1715.1],[113.0,1731.6],[114.0,1748.0],[115.0,1764.4],[116.0,1780.8],[117.0,1797.3],[118.0,1813.7],[119.0,1830.1],[120.0,1846.5],[121.0,1863.0],[122.0,1879.4],[123.0,1895.8],[124.0,1912.2],[125.0,1928.6],[126.0,1945.1],[126.3,1950.0],[126.7,1955.0],[127.0,1960.0],[127.4,1965.0],[127.7,1970.0],[128.1,1975.0],[128.5,1980.0],[128.9,1985.0],[129.3,1990.0],[129.7,1995.0],[130.0,2000.0],[130.4,2005.0],[130.8,2010.0],[131.2,2015.0],[131.6,2020.0],[132.0,2025.0],[132.4,2030.0],[132.9,2035.0],[133.3,2040.0],[133.8,2045.0],[134.2,2050.0],[135.0,2058.0],[136.0,2068.0],[137.0,2078.0],[138.0,2088.0],[139.0,2098.0],[139.2,2100.0]],
+    [[0.0,0.0],[1.0,11.8],[2.0,23.5],[3.0,35.3],[4.0,47.1],[5.0,58.8],[6.0,70.6],[7.0,82.4],[8.0,94.1],[9.0,105.9],[10.0,117.6],[11.0,129.4],[12.0,141.2],[13.0,152.9],[14.0,164.7],[15.0,176.5],[16.0,188.2],[17.0,200.0],[18.0,211.8],[19.0,223.5],[20.0,235.3],[21.0,247.1],[22.0,258.8],[23.0,270.6],[24.0,282.4],[25.0,294.1],[26.0,305.9],[27.0,317.6],[28.0,329.4],[29.0,341.2],[30.0,352.9],[31.0,364.7],[32.0,376.5],[33.0,388.2],[34.0,400.0],[35.0,411.8],[36.0,423.5],[37.0,435.3],[38.0,447.1],[39.0,458.8],[40.0,470.6],[41.0,482.4],[42.0,494.1],[42.5,500.0],[43.0,509.2],[44.0,527.6],[45.0,546.0],[46.0,564.3],[47.0,582.7],[48.0,601.1],[49.0,619.5],[50.0,637.9],[51.0,656.3],[52.0,674.6],[53.0,693.0],[54.0,711.4],[55.0,729.8],[56.0,748.2],[57.0,766.5],[58.0,784.9],[59.0,803.3],[60.0,821.7],[61.0,840.1],[62.0,858.5],[63.0,876.8],[64.0,895.2],[65.0,913.6],[66.0,932.0],[67.0,950.4],[68.0,968.8],[69.0,987.1],[69.7,1000.0],[70.0,1005.5],[71.0,1023.7],[72.0,1042.0],[73.0,1060.2],[74.0,1078.5],[75.0,1096.7],[76.0,1115.0],[77.0,1133.2],[78.0,1151.5],[79.0,1169.7],[80.0,1188.0],[81.0,1206.2],[82.0,1224.5],[83.0,1242.7],[84.0,1260.9],[85.0,1279.2],[86.0,1297.4],[87.0,1315.7],[88.0,1333.9],[89.0,1352.2],[90.0,1370.4],[91.0,1388.7],[92.0,1406.9],[93.0,1425.2],[94.0,1443.4],[95.0,1461.7],[96.0,1479.9],[97.0,1498.2],[97.1,1500.0],[98.0,1514.5],[99.0,1530.6],[100.0,1546.8],[101.0,1562.9],[102.0,1579.0],[103.0,1595.2],[104.0,1611.3],[105.0,1627.4],[106.0,1643.5],[107.0,1659.7],[108.0,1675.8],[109.0,1691.9],[110.0,1708.1],[111.0,1724.2],[112.0,1740.3],[113.0,1756.5],[114.0,1772.6],[115.0,1788.7],[116.0,1804.8],[117.0,1821.0],[118.0,1837.1],[119.0,1853.2],[120.0,1869.4],[121.0,1885.5],[122.0,1901.6],[123.0,1917.7],[124.0,1933.9],[125.0,1950.0],[125.5,1955.0],[126.0,1960.0],[126.5,1965.0],[127.0,1970.0],[127.5,1975.0],[127.9,1980.0],[128.4,1985.0],[128.8,1990.0],[129.3,1995.0],[129.7,2000.0],[130.2,2005.0],[130.6,2010.0],[131.1,2015.0],[131.6,2020.0],[132.1,2025.0],[132.6,2030.0],[133.1,2035.0],[133.6,2040.0],[134.2,2045.0],[134.7,2050.0]],
+    [[0.0,0.0],[1.0,13.2],[2.0,26.5],[3.0,39.7],[4.0,52.9],[5.0,66.1],[6.0,79.4],[7.0,92.6],[8.0,105.8],[9.0,119.0],[10.0,132.3],[11.0,145.5],[12.0,158.7],[13.0,172.0],[14.0,185.2],[15.0,198.4],[16.0,211.6],[17.0,224.9],[18.0,238.1],[19.0,251.3],[20.0,264.6],[21.0,277.8],[22.0,291.0],[23.0,304.2],[24.0,317.5],[25.0,330.7],[26.0,343.9],[27.0,357.1],[28.0,370.4],[29.0,383.6],[30.0,396.8],[31.0,410.1],[32.0,423.3],[33.0,436.5],[34.0,449.7],[35.0,463.0],[36.0,476.2],[37.0,489.4],[37.8,500.0],[38.0,503.7],[39.0,522.5],[40.0,541.2],[41.0,559.9],[42.0,578.7],[43.0,597.4],[44.0,616.1],[45.0,634.8],[46.0,653.6],[47.0,672.3],[48.0,691.0],[49.0,709.7],[50.0,728.5],[51.0,747.2],[52.0,765.9],[53.0,784.6],[54.0,803.4],[55.0,822.1],[56.0,840.8],[57.0,859.6],[58.0,878.3],[59.0,897.0],[60.0,915.7],[61.0,934.5],[62.0,953.2],[63.0,971.9],[64.0,990.6],[64.5,1000.0],[65.0,1009.5],[66.0,1028.5],[67.0,1047.5],[68.0,1066.5],[69.0,1085.6],[70.0,1104.6],[71.0,1123.6],[72.0,1142.6],[73.0,1161.6],[74.0,1180.6],[75.0,1199.6],[76.0,1218.6],[77.0,1237.6],[78.0,1256.7],[79.0,1275.7],[80.0,1294.7],[81.0,1313.7],[82.0,1332.7],[83.0,1351.7],[84.0,1370.7],[85.0,1389.7],[86.0,1408.7],[87.0,1427.8],[88.0,1446.8],[89.0,1465.8],[90.0,1484.8],[90.8,1500.0],[91.0,1503.3],[92.0,1519.8],[93.0,1536.3],[94.0,1552.7],[95.0,1569.2],[96.0,1585.7],[97.0,1602.2],[98.0,1618.7],[99.0,1635.2],[100.0,1651.6],[101.0,1668.1],[102.0,1684.6],[103.0,1701.1],[104.0,1717.6],[105.0,1734.1],[106.0,1750.5],[107.0,1767.0],[108.0,1783.5],[109.0,1800.0],[110.0,1816.5],[111.0,1833.0],[112.0,1849.5],[113.0,1865.9],[114.0,1882.4],[115.0,1898.9],[116.0,1915.4],[117.0,1931.9],[118.0,1948.4],[118.1,1950.0],[118.5,1955.0],[118.8,1960.0],[119.1,1965.0],[119.4,1970.0],[119.8,1975.0],[120.2,1980.0],[120.6,1985.0],[120.9,1990.0],[121.3,1995.0],[121.7,2000.0],[122.1,2005.0],[122.5,2010.0],[123.0,2015.0],[123.4,2020.0],[123.9,2025.0],[124.3,2030.0],[124.8,2035.0],[125.2,2040.0],[125.6,2045.0],[126.0,2050.0],[127.0,2060.4],[128.0,2070.8],[129.0,2081.3],[130.0,2091.7],[130.8,2100.0]]
+  ] },
+  'QAA-2924': { compartimentos: [
+    [[0.0,0.0],[1.0,2.2],[2.0,6.1],[3.0,11.0],[4.0,16.8],[5.0,23.3],[6.0,30.5],[7.0,38.3],[8.0,46.7],[9.0,55.5],[10.0,64.8],[11.0,74.5],[12.0,84.7],[13.0,95.2],[14.0,106.1],[15.0,117.4],[16.0,129.0],[17.0,140.9],[18.0,153.2],[19.0,165.7],[20.0,178.6],[21.0,191.7],[22.0,205.0],[23.0,218.7],[24.0,232.6],[25.0,246.7],[26.0,261.1],[27.0,275.6],[28.0,290.5],[29.0,305.5],[30.0,320.7],[31.0,336.1],[32.0,351.7],[33.0,367.5],[34.0,383.5],[35.0,399.7],[36.0,416.0],[37.0,432.5],[38.0,449.1],[39.0,465.9],[40.0,482.9],[40.5,500.0],[42.0,527.9],[43.0,545.5],[44.0,563.3],[45.0,581.2],[46.0,599.2],[47.0,617.3],[48.0,635.6],[49.0,653.9],[50.0,672.4],[51.0,691.0],[52.0,709.7],[53.0,728.5],[54.0,747.4],[55.0,766.3],[56.0,785.4],[57.0,804.6],[58.0,823.8],[59.0,843.1],[60.0,862.5],[61.0,881.9],[62.0,901.5],[63.0,921.0],[64.0,940.7],[65.0,960.4],[66.0,980.2],[67.3,1000.0],[68.0,1019.2],[69.0,1038.5],[70.0,1057.7],[71.0,1076.9],[72.0,1096.2],[73.0,1115.4],[74.0,1134.6],[75.0,1140.1],[76.0,1160.0],[77.0,1180.0],[78.0,1199.9],[79.0,1219.9],[80.0,1239.9],[81.0,1259.9],[82.0,1279.9],[83.0,1299.9],[84.0,1320.0],[85.0,1340.0],[86.0,1360.0],[87.0,1380.0],[88.0,1400.1],[89.0,1420.1],[90.0,1440.1],[91.0,1460.1],[92.0,1480.0],[92.9,1500.0],[94.0,1517.9],[95.0,1537.8],[96.0,1557.6],[97.0,1577.5],[98.0,1597.3],[99.0,1617.0],[100.0,1636.7],[101.0,1656.4],[102.0,1676.0],[103.0,1695.6],[104.0,1715.2],[105.0,1734.6],[106.0,1754.1],[107.0,1773.4],[108.0,1792.7],[109.0,1812.0],[110.0,1831.1],[111.0,1850.2],[112.0,1869.2],[113.0,1888.2],[114.0,1907.0],[115.0,1925.8],[116.0,1944.5],[117.0,1963.1],[118.0,1981.6],[119.3,2000.0],[120.0,2014.7],[121.0,2029.4],[122.0,2044.1],[123.0,2058.8],[124.0,2073.5],[125.0,2078.7],[126.0,2096.1],[127.0,2113.4],[128.0,2130.5],[129.0,2147.4],[130.0,2164.3],[131.0,2181.0],[132.0,2197.5],[133.0,2213.9],[134.0,2230.1],[135.0,2246.1],[136.0,2262.0],[137.0,2277.7],[138.0,2293.3],[139.0,2308.6],[140.0,2323.8],[141.0,2338.7],[142.0,2353.5],[143.0,2368.0],[144.0,2382.3],[145.0,2396.4],[146.0,2410.3],[147.0,2423.9],[148.0,2437.2],[149.0,2450.3],[150.0,2463.2],[151.0,2475.8],[152.0,2488.0],[153.2,2500.0],[154.0,2506.9],[155.0,2518.2],[156.0,2529.2],[157.0,2539.8],[157.6,2550.0]],
+    [[0.0,0.0],[1.0,2.6],[2.0,6.9],[3.0,12.3],[4.0,18.6],[5.0,25.5],[6.0,33.2],[7.0,41.4],[8.0,50.2],[9.0,59.4],[10.0,69.1],[11.0,79.3],[12.0,89.9],[13.0,100.9],[14.0,112.2],[15.0,123.9],[16.0,135.9],[17.0,148.3],[18.0,161.0],[19.0,174.0],[20.0,187.2],[21.0,200.8],[22.0,214.6],[23.0,228.6],[24.0,242.9],[25.0,257.5],[26.0,272.3],[27.0,287.3],[28.0,302.5],[29.0,317.9],[30.0,333.6],[31.0,349.4],[32.0,365.5],[33.0,381.7],[34.0,398.1],[35.0,414.7],[36.0,431.4],[37.0,448.3],[38.0,465.4],[39.0,482.6],[40.4,500.0],[41.0,517.9],[42.0,535.7],[43.0,553.6],[44.0,571.4],[45.0,589.3],[46.0,607.1],[47.0,625.0],[48.0,642.9],[49.0,660.7],[50.0,678.6],[51.0,696.4],[52.0,714.3],[53.0,732.1],[54.0,750.0],[55.0,767.9],[56.0,785.7],[57.0,803.6],[58.0,821.4],[59.0,839.3],[60.0,845.0],[61.0,864.2],[62.0,883.4],[63.0,902.7],[64.0,922.0],[65.0,941.4],[66.0,960.9],[67.0,980.4],[67.6,1000.0],[69.0,1021.5],[70.0,1041.2],[71.0,1060.9],[72.0,1080.7],[73.0,1100.5],[74.0,1120.4],[75.0,1140.2],[76.0,1160.1],[77.0,1180.1],[78.0,1200.0],[79.0,1220.0],[80.0,1240.0],[81.0,1260.0],[82.0,1280.0],[83.0,1300.0],[84.0,1320.0],[85.0,1340.0],[86.0,1360.1],[87.0,1380.1],[88.0,1400.1],[89.0,1420.1],[90.0,1440.1],[91.0,1460.1],[92.0,1480.1],[92.9,1500.0],[94.0,1518.0],[95.0,1537.9],[96.0,1557.7],[97.0,1577.6],[98.0,1597.4],[99.0,1617.1],[100.0,1636.8],[101.0,1656.5],[102.0,1676.1],[103.0,1695.7],[104.0,1715.2],[105.0,1734.7],[106.0,1754.1],[107.0,1773.5],[108.0,1792.8],[109.0,1812.0],[110.0,1831.2],[111.0,1850.3],[112.0,1869.3],[113.0,1888.2],[114.0,1907.1],[115.0,1925.8],[116.0,1944.5],[117.0,1963.1],[118.0,1981.6],[119.3,2000.0],[120.0,2013.9],[121.0,2027.8],[122.0,2041.7],[123.0,2055.6],[124.0,2069.4],[125.0,2083.3],[126.0,2097.2],[127.0,2111.1],[128.0,2125.0],[129.0,2138.9],[130.0,2144.9],[131.0,2161.4],[132.0,2177.8],[133.0,2194.0],[134.0,2210.1],[135.0,2226.0],[136.0,2241.8],[137.0,2257.3],[138.0,2272.7],[139.0,2287.9],[140.0,2302.9],[141.0,2317.7],[142.0,2332.3],[143.0,2346.7],[144.0,2360.9],[145.0,2374.8],[146.0,2388.5],[147.0,2402.0],[148.0,2415.2],[149.0,2428.2],[150.0,2440.9],[151.0,2453.3],[152.0,2465.4],[153.0,2477.3],[154.0,2488.8],[154.5,2500.0],[156.0,2519.5],[157.0,2530.0],[158.0,2540.2],[158.6,2550.0]],
+    [[0.0,0.0],[1.0,3.0],[2.0,7.6],[3.0,13.4],[4.0,20.0],[5.0,27.3],[6.0,35.4],[7.0,44.0],[8.0,53.1],[9.0,62.8],[10.0,72.9],[11.0,83.5],[12.0,94.5],[13.0,105.9],[14.0,117.7],[15.0,129.8],[16.0,142.3],[17.0,155.1],[18.0,168.3],[19.0,181.7],[20.0,195.4],[21.0,209.4],[22.0,223.7],[23.0,238.2],[24.0,253.0],[25.0,268.0],[26.0,283.3],[27.0,298.7],[28.0,314.5],[29.0,330.4],[30.0,346.5],[31.0,362.8],[32.0,379.4],[33.0,396.1],[34.0,413.0],[35.0,430.0],[36.0,447.3],[37.0,464.7],[38.0,482.3],[39.3,500.0],[40.0,518.5],[41.0,537.0],[42.0,555.6],[43.0,574.1],[44.0,592.6],[45.0,611.1],[46.0,629.6],[47.0,648.1],[48.0,666.7],[49.0,685.2],[50.0,703.7],[51.0,722.2],[52.0,740.7],[53.0,759.3],[54.0,777.8],[55.0,796.3],[56.0,801.8],[57.0,821.2],[58.0,840.8],[59.0,860.5],[60.0,880.2],[61.0,900.0],[62.0,919.9],[63.0,939.8],[64.0,959.8],[65.0,979.9],[66.3,1000.0],[67.0,1019.2],[68.0,1038.5],[69.0,1057.7],[70.0,1076.9],[71.0,1096.2],[72.0,1115.4],[73.0,1134.6],[74.0,1153.8],[75.0,1173.1],[76.0,1192.3],[77.0,1211.5],[78.0,1230.8],[79.0,1236.5],[80.0,1256.7],[81.0,1277.0],[82.0,1297.3],[83.0,1317.6],[84.0,1337.8],[85.0,1358.1],[86.0,1378.4],[87.0,1398.7],[88.0,1419.0],[89.0,1439.3],[90.0,1459.5],[91.0,1479.8],[92.1,1500.0],[93.0,1511.8],[94.0,1531.9],[95.0,1552.0],[96.0,1572.0],[97.0,1592.1],[98.0,1612.0],[99.0,1632.0],[100.0,1651.9],[101.0,1671.8],[102.0,1691.6],[103.0,1711.3],[104.0,1731.1],[105.0,1750.7],[106.0,1770.3],[107.0,1789.9],[108.0,1809.4],[109.0,1828.8],[110.0,1848.1],[111.0,1867.4],[112.0,1886.6],[113.0,1905.7],[114.0,1924.7],[115.0,1943.7],[116.0,1962.6],[117.0,1981.3],[118.3,2000.0],[119.0,2014.7],[120.0,2029.4],[121.0,2044.1],[122.0,2058.8],[123.0,2073.5],[124.0,2088.2],[125.0,2102.9],[126.0,2117.6],[127.0,2123.7],[128.0,2140.9],[129.0,2158.0],[130.0,2174.9],[131.0,2191.7],[132.0,2208.3],[133.0,2224.7],[134.0,2241.0],[135.0,2257.2],[136.0,2273.1],[137.0,2288.9],[138.0,2304.5],[139.0,2319.9],[140.0,2335.1],[141.0,2350.1],[142.0,2364.9],[143.0,2379.5],[144.0,2393.9],[145.0,2408.1],[146.0,2422.0],[147.0,2435.6],[148.0,2449.0],[149.0,2462.2],[150.0,2475.1],[151.0,2487.7],[152.3,2500.0],[153.0,2505.4],[154.0,2517.1],[155.0,2528.4],[156.0,2539.4],[157.0,2550.0]],
+    [[0.0,0.0],[1.0,2.6],[2.0,6.9],[3.0,12.3],[4.0,18.6],[5.0,25.5],[6.0,33.2],[7.0,41.4],[8.0,50.2],[9.0,59.4],[10.0,69.1],[11.0,79.3],[12.0,89.9],[13.0,100.9],[14.0,112.2],[15.0,123.9],[16.0,135.9],[17.0,148.3],[18.0,161.0],[19.0,174.0],[20.0,187.2],[21.0,200.8],[22.0,214.6],[23.0,228.6],[24.0,242.9],[25.0,257.5],[26.0,272.3],[27.0,287.3],[28.0,302.5],[29.0,317.9],[30.0,333.6],[31.0,349.4],[32.0,365.5],[33.0,381.7],[34.0,398.1],[35.0,414.7],[36.0,431.4],[37.0,448.3],[38.0,465.4],[39.0,482.6],[39.5,500.0],[41.0,510.5],[42.0,528.0],[43.0,545.7],[44.0,563.4],[45.0,581.3],[46.0,599.3],[47.0,617.5],[48.0,635.7],[49.0,654.1],[50.0,672.6],[51.0,691.1],[52.0,709.8],[53.0,728.6],[54.0,747.5],[55.0,766.4],[56.0,785.5],[57.0,804.6],[58.0,823.9],[59.0,843.2],[60.0,862.5],[61.0,882.0],[62.0,901.5],[63.0,921.1],[64.0,940.7],[65.0,960.4],[66.0,980.2],[66.8,1000.0],[68.0,1019.2],[69.0,1038.5],[70.0,1057.7],[71.0,1076.9],[72.0,1096.2],[73.0,1115.4],[74.0,1134.6],[75.0,1140.2],[76.0,1160.1],[77.0,1180.1],[78.0,1200.0],[79.0,1220.0],[80.0,1240.0],[81.0,1260.0],[82.0,1280.0],[83.0,1300.0],[84.0,1320.0],[85.0,1340.0],[86.0,1360.1],[87.0,1380.1],[88.0,1400.1],[89.0,1420.1],[90.0,1440.1],[91.0,1460.1],[92.0,1480.1],[92.9,1500.0],[94.0,1518.0],[95.0,1537.9],[96.0,1557.7],[97.0,1577.6],[98.0,1597.4],[99.0,1617.1],[100.0,1636.8],[101.0,1656.5],[102.0,1676.1],[103.0,1695.7],[104.0,1715.2],[105.0,1734.7],[106.0,1754.1],[107.0,1773.5],[108.0,1792.8],[109.0,1812.0],[110.0,1831.2],[111.0,1850.3],[112.0,1869.3],[113.0,1888.2],[114.0,1907.1],[115.0,1925.8],[116.0,1944.5],[117.0,1963.1],[118.0,1981.6],[119.2,2000.0],[120.0,2014.3],[121.0,2028.6],[122.0,2042.9],[123.0,2057.1],[124.0,2071.4],[125.0,2085.7],[126.0,2100.0],[127.0,2114.3],[128.0,2120.7],[129.0,2137.6],[130.0,2154.3],[131.0,2171.0],[132.0,2187.4],[133.0,2203.7],[134.0,2219.9],[135.0,2235.8],[136.0,2251.7],[137.0,2267.3],[138.0,2282.7],[139.0,2298.0],[140.0,2313.1],[141.0,2328.0],[142.0,2342.6],[143.0,2357.1],[144.0,2371.3],[145.0,2385.4],[146.0,2399.1],[147.0,2412.7],[148.0,2426.0],[149.0,2439.0],[150.0,2451.8],[151.0,2464.3],[152.0,2476.5],[153.0,2488.4],[153.8,2500.0],[155.0,2518.2],[156.0,2529.1],[157.0,2539.8],[158.4,2550.0]]
+  ] },
+  'QAA-2925': { compartimentos: [
+    [[0.0,0.0],[1.0,2.3],[2.0,6.4],[3.0,11.6],[4.0,17.6],[5.0,24.5],[6.0,31.9],[7.0,40.0],[8.0,48.7],[9.0,57.9],[10.0,67.5],[11.0,77.6],[12.0,88.1],[13.0,99.1],[14.0,110.4],[15.0,122.0],[16.0,134.1],[17.0,146.4],[18.0,159.1],[19.0,172.1],[20.0,185.4],[21.0,198.9],[22.0,212.8],[23.0,226.9],[24.0,241.3],[25.0,255.9],[26.0,270.7],[27.0,285.8],[28.0,301.1],[29.0,316.6],[30.0,332.4],[31.0,348.3],[32.0,364.5],[33.0,380.8],[34.0,397.3],[35.0,414.0],[36.0,430.9],[37.0,447.9],[38.0,465.1],[39.0,482.5],[40.2,500.0],[41.0,507.5],[42.0,525.1],[43.0,542.8],[44.0,560.7],[45.0,592.6],[46.0,611.1],[47.0,629.6],[48.0,648.1],[49.0,666.7],[50.0,685.2],[51.0,703.7],[52.0,722.2],[53.0,740.7],[54.0,745.8],[55.0,764.8],[56.0,784.0],[57.0,803.3],[58.0,822.6],[59.0,842.1],[60.0,861.6],[61.0,881.1],[62.0,900.8],[63.0,920.5],[64.0,940.3],[65.0,960.1],[66.0,980.0],[67.0,1000.0],[68.0,1013.9],[69.0,1033.9],[70.0,1053.9],[71.0,1074.0],[72.0,1094.0],[73.0,1114.2],[74.0,1134.4],[75.0,1154.6],[76.0,1174.8],[77.0,1195.0],[78.0,1215.3],[79.0,1235.6],[80.0,1255.9],[81.0,1276.3],[82.0,1296.6],[83.0,1316.9],[84.0,1337.3],[85.0,1357.7],[86.0,1378.0],[87.0,1398.4],[88.0,1418.7],[89.0,1439.1],[90.0,1459.4],[91.0,1479.7],[92.3,1500.0],[93.0,1518.5],[94.0,1537.0],[95.0,1555.6],[96.0,1574.1],[97.0,1592.6],[98.0,1611.1],[99.0,1629.6],[100.0,1635.5],[101.0,1655.3],[102.0,1675.0],[103.0,1694.7],[104.0,1714.3],[105.0,1733.8],[106.0,1753.3],[107.0,1772.7],[108.0,1792.1],[109.0,1811.4],[110.0,1830.6],[111.0,1849.8],[112.0,1868.9],[113.0,1887.9],[114.0,1906.8],[115.0,1925.6],[116.0,1944.4],[117.0,1963.0],[118.0,1981.6],[119.0,2000.0],[120.0,2014.7],[121.0,2029.4],[122.0,2044.1],[123.0,2058.8],[124.0,2073.5],[125.0,2079.7],[126.0,2097.1],[127.0,2114.4],[128.0,2131.5],[129.0,2148.5],[130.0,2165.4],[131.0,2182.1],[132.0,2198.6],[133.0,2215.0],[134.0,2231.2],[135.0,2247.3],[136.0,2263.1],[137.0,2278.8],[138.0,2294.3],[139.0,2309.6],[140.0,2324.8],[141.0,2339.7],[142.0,2354.4],[143.0,2368.9],[144.0,2383.1],[145.0,2397.1],[146.0,2410.9],[147.0,2424.5],[148.0,2437.8],[149.0,2450.8],[150.0,2463.5],[151.0,2476.0],[152.0,2488.1],[152.5,2500.0],[154.0,2507.5],[155.0,2518.6],[156.0,2529.5],[157.0,2539.9],[157.9,2550.0]],
+    [[0.0,0.0],[1.0,1.9],[2.0,5.6],[3.0,10.3],[4.0,16.0],[5.0,22.4],[6.0,29.4],[7.0,37.1],[8.0,45.3],[9.0,54.1],[10.0,63.3],[11.0,73.0],[12.0,83.1],[13.0,93.6],[14.0,104.4],[15.0,115.7],[16.0,127.3],[17.0,139.2],[18.0,151.5],[19.0,164.0],[20.0,176.9],[21.0,190.0],[22.0,203.4],[23.0,217.1],[24.0,231.0],[25.0,245.2],[26.0,259.6],[27.0,274.3],[28.0,289.1],[29.0,304.2],[30.0,319.5],[31.0,335.0],[32.0,350.7],[33.0,366.6],[34.0,382.7],[35.0,399.0],[36.0,415.4],[37.0,432.0],[38.0,448.8],[39.0,465.7],[40.0,482.8],[40.5,500.0],[42.0,512.9],[43.0,530.3],[44.0,547.9],[45.0,565.6],[46.0,583.4],[47.0,601.3],[48.0,619.4],[49.0,637.5],[50.0,655.8],[51.0,674.2],[52.0,692.7],[53.0,711.3],[54.0,730.0],[55.0,748.8],[56.0,767.6],[57.0,786.6],[58.0,805.6],[59.0,824.8],[60.0,844.0],[61.0,863.3],[62.0,882.6],[63.0,902.0],[64.0,921.5],[65.0,941.0],[66.0,960.6],[67.0,980.3],[67.6,1000.0],[69.0,1034.0],[70.0,1054.0],[71.0,1074.1],[72.0,1094.2],[73.0,1114.3],[74.0,1134.5],[75.0,1154.7],[76.0,1174.9],[77.0,1195.1],[78.0,1215.4],[79.0,1235.7],[80.0,1256.0],[81.0,1276.3],[82.0,1296.7],[83.0,1317.0],[84.0,1337.4],[85.0,1357.7],[86.0,1378.1],[87.0,1398.4],[88.0,1418.7],[89.0,1439.1],[90.0,1459.4],[91.0,1479.7],[92.0,1500.0],[93.0,1518.5],[94.0,1537.0],[95.0,1555.6],[96.0,1574.1],[97.0,1592.6],[98.0,1611.1],[99.0,1629.6],[100.0,1635.6],[101.0,1655.4],[102.0,1675.1],[103.0,1694.7],[104.0,1714.3],[105.0,1733.9],[106.0,1753.4],[107.0,1772.8],[108.0,1792.2],[109.0,1811.5],[110.0,1830.7],[111.0,1849.8],[112.0,1868.9],[113.0,1887.9],[114.0,1906.8],[115.0,1925.6],[116.0,1944.4],[117.0,1963.0],[118.0,1981.6],[118.6,2000.0],[120.0,2014.7],[121.0,2029.4],[122.0,2044.1],[123.0,2058.8],[124.0,2073.5],[125.0,2079.7],[126.0,2097.1],[127.0,2114.3],[128.0,2131.5],[129.0,2148.5],[130.0,2165.3],[131.0,2182.0],[132.0,2198.5],[133.0,2214.9],[134.0,2231.1],[135.0,2247.2],[136.0,2263.1],[137.0,2278.8],[138.0,2294.3],[139.0,2309.6],[140.0,2324.7],[141.0,2339.6],[142.0,2354.3],[143.0,2368.8],[144.0,2383.1],[145.0,2397.1],[146.0,2410.9],[147.0,2424.4],[148.0,2437.7],[149.0,2450.8],[150.0,2463.5],[151.0,2476.0],[152.0,2488.1],[153.0,2500.0],[154.0,2508.3],[155.0,2516.7],[156.0,2525.0],[157.0,2530.4],[158.0,2540.4],[158.6,2550.0]],
+    [[0.0,0.0],[1.0,2.8],[2.0,7.3],[3.0,12.9],[4.0,19.4],[5.0,26.7],[6.0,34.6],[7.0,43.2],[8.0,52.3],[9.0,61.9],[10.0,72.0],[11.0,82.5],[12.0,93.5],[13.0,104.9],[14.0,116.6],[15.0,128.8],[16.0,141.2],[17.0,154.1],[18.0,167.2],[19.0,180.6],[20.0,194.4],[21.0,208.4],[22.0,222.7],[23.0,237.2],[24.0,252.0],[25.0,267.1],[26.0,282.4],[27.0,297.9],[28.0,313.7],[29.0,329.7],[30.0,345.9],[31.0,362.2],[32.0,378.8],[33.0,395.6],[34.0,412.6],[35.0,429.7],[36.0,447.0],[37.0,464.5],[38.0,482.2],[39.0,500.0],[40.0,514.7],[41.0,532.7],[42.0,550.9],[43.0,569.2],[44.0,587.7],[45.0,606.2],[46.0,625.0],[47.0,643.8],[48.0,662.8],[49.0,681.9],[50.0,701.0],[51.0,720.3],[52.0,739.8],[53.0,759.3],[54.0,778.9],[55.0,798.6],[56.0,818.4],[57.0,838.2],[58.0,858.2],[59.0,878.2],[60.0,898.4],[61.0,918.6],[62.0,938.8],[63.0,959.1],[64.0,979.5],[65.4,1000.0],[66.0,1019.2],[67.0,1038.5],[68.0,1057.7],[69.0,1076.9],[70.0,1096.2],[71.0,1115.4],[72.0,1134.6],[73.0,1153.8],[74.0,1173.1],[75.0,1192.3],[76.0,1211.5],[77.0,1230.8],[78.0,1250.0],[79.0,1269.2],[80.0,1288.5],[81.0,1294.3],[82.0,1314.9],[83.0,1335.5],[84.0,1356.0],[85.0,1376.6],[86.0,1397.2],[87.0,1417.8],[88.0,1438.3],[89.0,1458.9],[90.0,1479.5],[90.8,1500.0],[92.0,1505.3],[93.0,1525.6],[94.0,1545.9],[95.0,1566.2],[96.0,1586.5],[97.0,1606.7],[98.0,1626.9],[99.0,1647.0],[100.0,1667.1],[101.0,1687.2],[102.0,1707.2],[103.0,1727.2],[104.0,1747.1],[105.0,1767.0],[106.0,1786.8],[107.0,1806.6],[108.0,1826.3],[109.0,1845.9],[110.0,1865.4],[111.0,1884.9],[112.0,1904.3],[113.0,1923.6],[114.0,1942.8],[115.0,1962.0],[116.0,1981.0],[117.3,2000.0],[118.0,2014.3],[119.0,2028.6],[120.0,2042.9],[121.0,2057.1],[122.0,2071.4],[123.0,2085.7],[124.0,2100.0],[125.0,2114.3],[126.0,2128.6],[127.0,2142.9],[128.0,2157.1],[129.0,2171.4],[130.0,2185.7],[131.0,2192.3],[132.0,2208.9],[133.0,2225.4],[134.0,2241.7],[135.0,2257.8],[136.0,2273.7],[137.0,2289.5],[138.0,2305.1],[139.0,2320.5],[140.0,2335.7],[141.0,2350.7],[142.0,2365.4],[143.0,2380.0],[144.0,2394.3],[145.0,2408.5],[146.0,2422.3],[147.0,2435.9],[148.0,2449.3],[149.0,2462.4],[150.0,2475.2],[151.0,2487.8],[151.7,2500.0],[153.0,2508.3],[154.0,2516.7],[155.0,2525.0],[156.0,2533.3],[157.0,2539.9],[157.6,2550.0]],
+    [[0.0,0.0],[1.0,2.3],[2.0,6.4],[3.0,11.5],[4.0,17.6],[5.0,24.4],[6.0,31.9],[7.0,40.0],[8.0,48.6],[9.0,57.8],[10.0,67.4],[11.0,77.5],[12.0,88.0],[13.0,98.9],[14.0,110.3],[15.0,121.9],[16.0,133.9],[17.0,146.3],[18.0,159.0],[19.0,172.0],[20.0,185.3],[21.0,198.8],[22.0,212.7],[23.0,226.8],[24.0,241.2],[25.0,255.8],[26.0,270.6],[27.0,285.7],[28.0,301.0],[29.0,316.6],[30.0,332.3],[31.0,348.2],[32.0,364.4],[33.0,380.7],[34.0,397.3],[35.0,414.0],[36.0,430.8],[37.0,447.9],[38.0,465.1],[39.0,482.5],[39.7,500.0],[41.0,519.8],[42.0,537.7],[43.0,555.7],[44.0,573.8],[45.0,592.1],[46.0,610.5],[47.0,629.1],[48.0,647.7],[49.0,666.5],[50.0,685.4],[51.0,704.4],[52.0,723.5],[53.0,742.7],[54.0,762.0],[55.0,781.4],[56.0,800.9],[57.0,820.4],[58.0,840.1],[59.0,859.8],[60.0,879.7],[61.0,899.5],[62.0,919.5],[63.0,939.5],[64.0,959.6],[65.0,979.8],[66.0,1000.0],[67.0,1008.8],[68.0,1028.9],[69.0,1049.1],[70.0,1069.4],[71.0,1089.7],[72.0,1110.0],[73.0,1130.3],[74.0,1150.7],[75.0,1171.2],[76.0,1191.6],[77.0,1212.1],[78.0,1232.6],[79.0,1253.2],[80.0,1273.7],[81.0,1294.3],[82.0,1314.8],[83.0,1335.4],[84.0,1356.0],[85.0,1376.6],[86.0,1397.2],[87.0,1417.7],[88.0,1438.3],[89.0,1458.9],[90.0,1479.5],[91.4,1500.0],[92.0,1518.5],[93.0,1537.0],[94.0,1555.6],[95.0,1574.1],[96.0,1592.6],[97.0,1611.1],[98.0,1629.6],[99.0,1648.1],[100.0,1666.7],[101.0,1685.2],[102.0,1690.9],[103.0,1710.7],[104.0,1730.5],[105.0,1750.2],[106.0,1769.8],[107.0,1789.4],[108.0,1809.0],[109.0,1828.4],[110.0,1847.8],[111.0,1867.1],[112.0,1886.4],[113.0,1905.5],[114.0,1924.6],[115.0,1943.6],[116.0,1962.5],[117.0,1981.3],[117.9,2000.0],[119.0,2015.2],[120.0,2030.3],[121.0,2045.5],[122.0,2060.6],[123.0,2075.8],[124.0,2082.0],[125.0,2099.7],[126.0,2117.2],[127.0,2134.7],[128.0,2152.0],[129.0,2169.1],[130.0,2186.1],[131.0,2203.0],[132.0,2219.7],[133.0,2236.2],[134.0,2252.6],[135.0,2268.8],[136.0,2284.8],[137.0,2300.7],[138.0,2316.3],[139.0,2331.8],[140.0,2347.1],[141.0,2362.1],[142.0,2377.0],[143.0,2391.6],[144.0,2406.1],[145.0,2420.2],[146.0,2434.2],[147.0,2447.9],[148.0,2461.3],[149.0,2474.5],[150.0,2487.4],[150.6,2500.0],[152.0,2508.3],[153.0,2516.7],[154.0,2525.0],[155.0,2533.3],[156.0,2539.5],[156.6,2550.0]]
+  ] },
+  'QAA-3330': { compartimentos: [
+    [[0.0,0.0],[1.0,8.8],[2.0,17.7],[3.0,26.5],[4.0,35.4],[5.0,44.2],[6.0,53.1],[7.0,61.9],[8.0,70.8],[9.0,79.6],[10.0,88.5],[11.0,97.3],[12.0,106.2],[13.0,115.0],[14.0,123.9],[15.0,132.7],[16.0,141.6],[17.0,150.4],[18.0,159.3],[19.0,168.1],[20.0,177.0],[21.0,185.8],[22.0,194.7],[23.0,203.5],[24.0,212.4],[25.0,221.2],[26.0,230.1],[27.0,238.9],[28.0,247.8],[29.0,256.6],[30.0,265.5],[31.0,274.3],[32.0,283.2],[33.0,292.0],[34.0,300.9],[35.0,309.7],[36.0,318.6],[37.0,327.4],[38.0,336.3],[39.0,345.1],[40.0,354.0],[41.0,362.8],[42.0,371.7],[43.0,380.5],[44.0,389.4],[45.0,398.2],[46.0,407.1],[47.0,415.9],[48.0,424.8],[49.0,433.6],[50.0,442.5],[51.0,451.3],[52.0,460.2],[53.0,469.0],[54.0,477.9],[55.0,486.7],[56.0,495.6],[56.5,500.0],[57.0,506.5],[58.0,519.6],[59.0,532.6],[60.0,545.7],[61.0,558.7],[62.0,571.8],[63.0,584.9],[64.0,597.9],[65.0,611.0],[66.0,624.0],[67.0,637.1],[68.0,650.1],[69.0,663.2],[70.0,676.2],[71.0,689.3],[72.0,702.3],[73.0,715.4],[74.0,728.5],[75.0,741.5],[76.0,754.6],[77.0,767.6],[78.0,780.7],[79.0,793.7],[80.0,806.8],[81.0,819.8],[82.0,832.9],[83.0,846.0],[84.0,859.0],[85.0,872.1],[86.0,885.1],[87.0,898.2],[88.0,911.2],[89.0,924.3],[90.0,937.3],[91.0,950.4],[92.0,963.4],[93.0,976.5],[94.0,989.6],[94.8,1000.0],[95.0,1002.6],[96.0,1015.5],[97.0,1028.4],[98.0,1041.3],[99.0,1054.3],[100.0,1067.2],[101.0,1080.1],[102.0,1093.0],[103.0,1105.9],[104.0,1118.9],[105.0,1131.8],[106.0,1144.7],[107.0,1157.6],[108.0,1170.5],[109.0,1183.5],[110.0,1196.4],[111.0,1209.3],[112.0,1222.2],[113.0,1235.1],[114.0,1248.1],[115.0,1261.0],[116.0,1273.9],[117.0,1286.8],[118.0,1299.7],[119.0,1312.7],[120.0,1325.6],[121.0,1338.5],[122.0,1351.4],[123.0,1364.3],[124.0,1377.3],[125.0,1390.2],[126.0,1403.1],[127.0,1416.0],[128.0,1428.9],[129.0,1441.9],[130.0,1454.8],[131.0,1467.7],[132.0,1480.6],[133.0,1493.5],[133.5,1500.0],[134.0,1504.5],[135.0,1513.4],[136.0,1522.4],[137.0,1531.3],[138.0,1540.3],[139.0,1549.2],[140.0,1558.2],[141.0,1567.1],[142.0,1576.0],[143.0,1585.0],[144.0,1593.9],[145.0,1602.9],[146.0,1611.8],[147.0,1620.8],[148.0,1629.7],[149.0,1638.7],[150.0,1647.6],[151.0,1656.6],[152.0,1665.5],[153.0,1674.5],[154.0,1683.4],[155.0,1692.3],[156.0,1701.3],[157.0,1710.2],[158.0,1719.2],[159.0,1728.1],[160.0,1737.1],[161.0,1746.0],[162.0,1755.0],[163.0,1763.9],[164.0,1772.9],[165.0,1781.8],[166.0,1790.8],[167.0,1799.7],[168.0,1808.6],[169.0,1817.6],[170.0,1826.5],[171.0,1835.5],[172.0,1844.4],[173.0,1853.4],[174.0,1862.3],[175.0,1871.3],[176.0,1880.2],[177.0,1889.2],[178.0,1898.1],[179.0,1907.1],[180.0,1916.0],[181.0,1925.0],[182.0,1933.9],[183.0,1942.8],[183.8,1950.0],[184.4,1955.0],[184.9,1960.0],[185.5,1965.0],[186.0,1970.0],[186.6,1975.0],[187.1,1980.0],[187.7,1985.0],[188.2,1990.0],[188.8,1995.0],[189.4,2000.0],[190.0,2005.0],[190.6,2010.0],[191.2,2015.0],[191.8,2020.0],[192.6,2025.0],[193.3,2030.0],[194.2,2035.0],[195.0,2040.0],[195.9,2045.0],[196.7,2050.0]],
+    [[0.0,0.0],[1.0,8.7],[2.0,17.4],[3.0,26.1],[4.0,34.8],[5.0,43.6],[6.0,52.3],[7.0,61.0],[8.0,69.7],[9.0,78.4],[10.0,87.1],[11.0,95.8],[12.0,104.5],[13.0,113.2],[14.0,122.0],[15.0,130.7],[16.0,139.4],[17.0,148.1],[18.0,156.8],[19.0,165.5],[20.0,174.2],[21.0,182.9],[22.0,191.6],[23.0,200.3],[24.0,209.1],[25.0,217.8],[26.0,226.5],[27.0,235.2],[28.0,243.9],[29.0,252.6],[30.0,261.3],[31.0,270.0],[32.0,278.7],[33.0,287.5],[34.0,296.2],[35.0,304.9],[36.0,313.6],[37.0,322.3],[38.0,331.0],[39.0,339.7],[40.0,348.4],[41.0,357.1],[42.0,365.9],[43.0,374.6],[44.0,383.3],[45.0,392.0],[46.0,400.7],[47.0,409.4],[48.0,418.1],[49.0,426.8],[50.0,435.5],[51.0,444.3],[52.0,453.0],[53.0,461.7],[54.0,470.4],[55.0,479.1],[56.0,487.8],[57.0,496.5],[57.4,500.0],[58.0,507.7],[59.0,520.6],[60.0,533.5],[61.0,546.4],[62.0,559.3],[63.0,572.2],[64.0,585.1],[65.0,597.9],[66.0,610.8],[67.0,623.7],[68.0,636.6],[69.0,649.5],[70.0,662.4],[71.0,675.3],[72.0,688.1],[73.0,701.0],[74.0,713.9],[75.0,726.8],[76.0,739.7],[77.0,752.6],[78.0,765.5],[79.0,778.4],[80.0,791.2],[81.0,804.1],[82.0,817.0],[83.0,829.9],[84.0,842.8],[85.0,855.7],[86.0,868.6],[87.0,881.4],[88.0,894.3],[89.0,907.2],[90.0,920.1],[91.0,933.0],[92.0,945.9],[93.0,958.8],[94.0,971.6],[95.0,984.5],[96.0,997.4],[96.2,1000.0],[97.0,1010.3],[98.0,1023.1],[99.0,1035.9],[100.0,1048.7],[101.0,1061.5],[102.0,1074.4],[103.0,1087.2],[104.0,1100.0],[105.0,1112.8],[106.0,1125.6],[107.0,1138.5],[108.0,1151.3],[109.0,1164.1],[110.0,1176.9],[111.0,1189.7],[112.0,1202.6],[113.0,1215.4],[114.0,1228.2],[115.0,1241.0],[116.0,1253.8],[117.0,1266.7],[118.0,1279.5],[119.0,1292.3],[120.0,1305.1],[121.0,1317.9],[122.0,1330.8],[123.0,1343.6],[124.0,1356.4],[125.0,1369.2],[126.0,1382.1],[127.0,1394.9],[128.0,1407.7],[129.0,1420.5],[130.0,1433.3],[131.0,1446.2],[132.0,1459.0],[133.0,1471.8],[134.0,1484.6],[135.0,1497.4],[135.2,1500.0],[136.0,1507.5],[137.0,1516.9],[138.0,1526.3],[139.0,1535.6],[140.0,1545.0],[141.0,1554.4],[142.0,1563.8],[143.0,1573.1],[144.0,1582.5],[145.0,1591.9],[146.0,1601.3],[147.0,1610.6],[148.0,1620.0],[149.0,1629.4],[150.0,1638.8],[151.0,1648.1],[152.0,1657.5],[153.0,1666.9],[154.0,1676.3],[155.0,1685.6],[156.0,1695.0],[157.0,1704.4],[158.0,1713.8],[159.0,1723.1],[160.0,1732.5],[161.0,1741.9],[162.0,1751.3],[163.0,1760.6],[164.0,1770.0],[165.0,1779.4],[166.0,1788.8],[167.0,1798.1],[168.0,1807.5],[169.0,1816.9],[170.0,1826.3],[171.0,1835.6],[172.0,1845.0],[173.0,1854.4],[174.0,1863.8],[175.0,1873.1],[176.0,1882.5],[177.0,1891.9],[178.0,1901.3],[179.0,1910.6],[180.0,1920.0],[181.0,1929.4],[182.0,1938.8],[183.0,1948.1],[183.2,1950.0],[183.8,1955.0],[184.4,1960.0],[185.0,1965.0],[185.6,1970.0],[186.2,1975.0],[186.8,1980.0],[187.4,1985.0],[188.0,1990.0],[188.5,1995.0],[189.0,2000.0],[189.7,2005.0],[190.3,2010.0],[190.9,2015.0],[191.5,2020.0],[192.0,2025.0],[192.4,2030.0],[193.5,2035.0],[194.5,2040.0],[195.3,2045.0],[196.1,2050.0]],
+    [[0.0,0.0],[1.0,9.0],[2.0,17.9],[3.0,26.9],[4.0,35.8],[5.0,44.8],[6.0,53.8],[7.0,62.7],[8.0,71.7],[9.0,80.6],[10.0,89.6],[11.0,98.6],[12.0,107.5],[13.0,116.5],[14.0,125.4],[15.0,134.4],[16.0,143.4],[17.0,152.3],[18.0,161.3],[19.0,170.3],[20.0,179.2],[21.0,188.2],[22.0,197.1],[23.0,206.1],[24.0,215.1],[25.0,224.0],[26.0,233.0],[27.0,241.9],[28.0,250.9],[29.0,259.9],[30.0,268.8],[31.0,277.8],[32.0,286.7],[33.0,295.7],[34.0,304.7],[35.0,313.6],[36.0,322.6],[37.0,331.5],[38.0,340.5],[39.0,349.5],[40.0,358.4],[41.0,367.4],[42.0,376.3],[43.0,385.3],[44.0,394.3],[45.0,403.2],[46.0,412.2],[47.0,421.1],[48.0,430.1],[49.0,439.1],[50.0,448.0],[51.0,457.0],[52.0,465.9],[53.0,474.9],[54.0,483.9],[55.0,492.8],[55.8,500.0],[56.0,502.6],[57.0,515.7],[58.0,528.7],[59.0,541.8],[60.0,554.8],[61.0,567.9],[62.0,580.9],[63.0,594.0],[64.0,607.0],[65.0,620.1],[66.0,633.2],[67.0,646.2],[68.0,659.3],[69.0,672.3],[70.0,685.4],[71.0,698.4],[72.0,711.5],[73.0,724.5],[74.0,737.6],[75.0,750.7],[76.0,763.7],[77.0,776.8],[78.0,789.8],[79.0,802.9],[80.0,815.9],[81.0,829.0],[82.0,842.0],[83.0,855.1],[84.0,868.1],[85.0,881.2],[86.0,894.3],[87.0,907.3],[88.0,920.4],[89.0,933.4],[90.0,946.5],[91.0,959.5],[92.0,972.6],[93.0,985.6],[94.0,998.7],[94.1,1000.0],[95.0,1011.7],[96.0,1024.8],[97.0,1037.9],[98.0,1050.9],[99.0,1064.0],[100.0,1077.0],[101.0,1090.1],[102.0,1103.1],[103.0,1116.2],[104.0,1129.2],[105.0,1142.3],[106.0,1155.4],[107.0,1168.4],[108.0,1181.5],[109.0,1194.5],[110.0,1207.6],[111.0,1220.6],[112.0,1233.7],[113.0,1246.7],[114.0,1259.8],[115.0,1272.8],[116.0,1285.9],[117.0,1299.0],[118.0,1312.0],[119.0,1325.1],[120.0,1338.1],[121.0,1351.2],[122.0,1364.2],[123.0,1377.3],[124.0,1390.3],[125.0,1403.4],[126.0,1416.4],[127.0,1429.5],[128.0,1442.6],[129.0,1455.6],[130.0,1468.7],[131.0,1481.7],[132.0,1494.8],[132.4,1500.0],[133.0,1505.6],[134.0,1514.8],[135.0,1524.1],[136.0,1533.3],[137.0,1542.6],[138.0,1551.9],[139.0,1561.1],[140.0,1570.4],[141.0,1579.6],[142.0,1588.9],[143.0,1598.1],[144.0,1607.4],[145.0,1616.7],[146.0,1625.9],[147.0,1635.2],[148.0,1644.4],[149.0,1653.7],[150.0,1663.0],[151.0,1672.2],[152.0,1681.5],[153.0,1690.7],[154.0,1700.0],[155.0,1709.3],[156.0,1718.5],[157.0,1727.8],[158.0,1737.0],[159.0,1746.3],[160.0,1755.6],[161.0,1764.8],[162.0,1774.1],[163.0,1783.3],[164.0,1792.6],[165.0,1801.9],[166.0,1811.1],[167.0,1820.4],[168.0,1829.6],[169.0,1838.9],[170.0,1848.1],[171.0,1857.4],[172.0,1866.7],[173.0,1875.9],[174.0,1885.2],[175.0,1894.4],[176.0,1903.7],[177.0,1913.0],[178.0,1922.2],[179.0,1931.5],[180.0,1940.7],[181.0,1950.0],[181.6,1955.0],[182.1,1960.0],[182.7,1965.0],[183.2,1970.0],[183.8,1975.0],[184.4,1980.0],[185.0,1985.0],[185.5,1990.0],[186.2,1995.0],[186.8,2000.0],[187.4,2005.0],[187.9,2010.0],[188.6,2015.0],[189.3,2020.0],[190.0,2025.0],[190.7,2030.0],[191.5,2035.0],[192.3,2040.0],[193.3,2045.0],[194.3,2050.0]]
+  ] },
+  'QAA-2896': { compartimentos: [
+    [[1.0,11.4],[2.0,22.9],[3.0,34.3],[4.0,45.8],[5.0,57.2],[6.0,68.6],[7.0,80.1],[8.0,91.5],[9.0,103.0],[10.0,114.4],[11.0,125.9],[13.0,148.7],[14.0,160.2],[15.0,171.6],[16.0,183.1],[17.0,194.5],[18.0,205.9],[19.0,217.4],[20.0,228.8],[21.0,240.3],[22.0,251.7],[23.0,263.2],[24.0,274.6],[25.0,286.0],[26.0,297.5],[27.0,308.9],[28.0,320.4],[29.0,331.8],[30.0,343.2],[31.0,354.7],[32.0,366.1],[33.0,377.6],[34.0,389.0],[35.0,400.5],[37.0,423.3],[38.0,434.8],[39.0,446.2],[40.0,457.7],[41.0,469.1],[42.0,480.5],[43.0,492.0],[44.0,505.3],[45.0,523.0],[46.0,540.8],[47.0,558.5],[48.0,576.2],[50.0,611.7],[51.0,629.4],[52.0,647.2],[53.0,664.9],[54.0,682.6],[55.0,700.4],[56.0,718.1],[57.0,735.8],[58.0,753.5],[59.0,771.3],[60.0,789.0],[61.0,806.7],[62.0,824.5],[63.0,842.2],[64.0,859.9],[65.0,877.7],[66.0,895.4],[67.0,913.1],[68.0,930.9],[69.0,948.6],[70.0,966.3],[71.0,984.0],[71.9,1000.0],[72.0,1001.7],[73.0,1018.6],[74.0,1035.6],[75.0,1052.5],[76.0,1069.5],[77.0,1086.4],[78.0,1103.4],[79.0,1120.3],[81.0,1154.2],[82.0,1171.2],[83.0,1188.1],[84.0,1205.1],[85.0,1222.0],[86.0,1239.0],[87.0,1255.9],[88.0,1272.9],[89.0,1289.8],[90.0,1306.8],[91.0,1323.7],[92.0,1340.7],[93.0,1357.6],[94.0,1374.6],[95.0,1391.5],[96.0,1408.5],[97.0,1425.4],[98.0,1442.4],[99.0,1459.3],[100.0,1476.3],[101.0,1493.2],[101.4,1500.0],[102.0,1509.1],[103.0,1524.3],[104.0,1539.5],[106.0,1569.9],[107.0,1585.1],[108.0,1600.3],[109.0,1615.5],[110.0,1630.7],[111.0,1645.9],[112.0,1661.1],[113.0,1676.4],[114.0,1691.6],[115.0,1706.8],[116.0,1722.0],[117.0,1737.2],[118.0,1752.4],[119.0,1767.6],[120.0,1782.8],[121.0,1798.0],[122.0,1813.2],[123.0,1828.4],[124.0,1843.6],[125.0,1858.8],[126.0,1874.0],[127.0,1889.2],[128.0,1904.4],[130.0,1934.8],[131.0,1950.0],[131.5,1955.0],[131.9,1960.0],[132.3,1965.0],[132.7,1970.0],[133.6,1980.0],[134.0,1985.0],[134.3,1990.0],[134.8,1995.0],[135.7,2005.0],[136.2,2010.0],[136.7,2015.0],[137.7,2025.0],[138.1,2030.0],[138.6,2035.0],[139.0,2040.0],[139.5,2045.0],[140.0,2050.0],[141.0,2059.8],[142.0,2069.6],[143.0,2079.4],[144.0,2089.2],[145.0,2099.0],[145.1,2100.0],[149.1,2130.0],[149.9,2135.0],[151.5,2145.0]],
+    [[1.0,6.5],[2.0,13.0],[3.0,19.5],[5.0,32.6],[6.0,39.1],[7.0,45.6],[9.0,58.6],[10.0,65.1],[11.0,71.6],[12.0,78.1],[13.0,84.6],[14.0,91.1],[15.0,97.7],[17.0,110.7],[18.0,117.2],[19.0,123.7],[20.0,130.2],[21.0,136.7],[22.0,143.2],[23.0,149.7],[24.0,156.3],[25.0,162.8],[26.0,169.3],[27.0,175.8],[28.0,182.3],[29.0,188.8],[30.0,195.3],[31.0,201.8],[32.0,208.3],[34.0,221.4],[36.0,234.4],[37.0,240.9],[38.0,247.4],[39.0,253.9],[41.0,266.9],[42.0,273.4],[43.0,279.9],[44.0,286.5],[45.0,293.0],[46.0,299.5],[47.0,306.0],[48.0,312.5],[49.0,319.0],[50.0,325.5],[51.0,332.0],[53.0,345.1],[54.0,351.6],[55.0,358.1],[56.0,364.6],[57.0,371.1],[58.0,377.6],[59.0,384.1],[60.0,390.6],[61.0,397.1],[62.0,403.6],[63.0,410.2],[64.0,416.7],[65.0,423.2],[66.0,429.7],[67.0,436.2],[68.0,442.7],[69.0,449.2],[70.0,455.7],[71.0,462.2],[72.0,468.8],[73.0,475.3],[74.0,481.8],[75.0,488.3],[76.0,494.8],[76.8,500.0],[77.0,501.4],[79.0,515.3],[80.0,522.2],[82.0,536.1],[83.0,543.0],[84.0,549.9],[85.0,556.9],[86.0,563.8],[87.0,570.7],[89.0,584.6],[90.0,591.5],[91.0,598.5],[92.0,605.4],[93.0,612.3],[94.0,619.3],[95.0,626.2],[96.0,633.1],[97.0,640.1],[98.0,647.0],[99.0,653.9],[100.0,660.9],[101.0,667.8],[102.0,674.7],[103.0,681.7],[104.0,688.6],[105.0,695.5],[106.0,702.5],[108.0,716.3],[109.0,723.3],[110.0,730.2],[111.0,737.1],[112.0,744.1],[114.0,757.9],[115.0,764.9],[116.0,771.8],[117.0,778.7],[119.0,792.6],[120.0,799.5],[121.0,806.5],[122.0,813.4],[123.0,820.3],[124.0,827.3],[125.0,834.2],[126.0,841.1],[128.0,855.0],[130.0,868.9],[132.0,882.7],[133.0,889.7],[134.0,896.6],[135.0,903.5],[136.0,910.5],[137.0,917.4],[138.0,924.3],[140.0,938.2],[141.0,945.1],[141.7,950.0],[142.5,955.0],[143.3,960.0],[144.1,965.0],[144.8,970.0],[145.7,975.0],[146.6,980.0],[147.5,985.0]],
+    [[1.0,6.5],[2.0,13.1],[3.0,19.6],[4.0,26.1],[5.0,32.6],[7.0,45.7],[9.0,58.7],[10.0,65.3],[11.0,71.6],[12.0,78.3],[13.0,84.9],[14.0,91.4],[15.0,97.9],[16.0,104.4],[17.0,111.0],[18.0,117.5],[19.0,124.0],[20.0,130.5],[21.0,137.1],[22.0,143.6],[23.0,150.1],[24.0,156.7],[25.0,163.2],[26.0,169.7],[27.0,176.2],[28.0,182.8],[29.0,189.3],[30.0,195.8],[31.0,202.3],[32.0,208.9],[33.0,215.4],[34.0,221.9],[35.0,228.5],[36.0,235.0],[37.0,241.5],[38.0,248.0],[39.0,254.6],[40.0,261.1],[41.0,267.6],[42.0,274.2],[43.0,280.7],[44.0,287.2],[45.0,293.7],[46.0,300.3],[47.0,306.8],[48.0,313.3],[49.0,319.8],[50.0,326.4],[51.0,332.9],[52.0,339.4],[53.0,346.0],[54.0,352.5],[56.0,365.5],[58.0,378.6],[59.0,385.1],[60.0,391.6],[61.0,398.2],[62.0,404.7],[63.0,411.2],[64.0,417.8],[65.0,424.3],[66.0,430.8],[67.0,437.3],[68.0,443.9],[69.0,450.4],[70.0,456.9],[71.0,463.4],[72.0,470.0],[73.0,476.5],[74.0,483.0],[75.0,489.6],[76.0,496.1],[76.6,500.0],[77.0,502.9],[78.0,510.1],[79.0,517.4],[80.0,524.6],[81.0,531.8],[82.0,539.1],[83.0,546.3],[84.0,553.5],[85.0,560.8],[86.0,568.0],[87.0,575.2],[88.0,582.5],[89.0,589.7],[90.0,596.9],[91.0,604.2],[92.0,611.4],[93.0,618.6],[94.0,625.9],[95.0,633.1],[96.0,640.4],[97.0,647.6],[98.0,654.8],[99.0,662.1],[100.0,669.3],[101.0,676.5],[102.0,683.8],[103.0,691.0],[104.0,698.2],[105.0,705.5],[106.0,712.7],[107.0,719.9],[108.0,727.2],[109.0,734.4],[110.0,741.6],[111.0,748.9],[112.0,756.1],[114.0,770.6],[115.0,777.8],[116.0,785.0],[117.0,792.3],[118.0,799.5],[119.0,806.8],[120.0,814.0],[121.0,821.2],[122.0,828.5],[123.0,835.7],[124.0,842.9],[126.0,857.4],[127.0,864.6],[128.0,871.9],[129.0,879.1],[130.0,886.3],[131.0,893.6],[132.0,900.8],[133.0,908.0],[134.0,915.3],[135.0,922.5],[136.0,929.7],[137.0,937.0],[138.0,944.2],[138.8,950.0],[139.6,955.0],[141.2,965.0],[141.9,970.0],[142.8,975.0],[143.6,980.0],[144.6,985.0],[145.5,990.0],[146.5,995.0],[147.5,1000.0]],
+    [[2.0,22.4],[3.0,33.6],[5.0,55.9],[6.0,67.1],[7.0,78.3],[8.0,89.5],[9.0,100.7],[10.0,111.9],[11.0,123.0],[13.0,145.4],[14.0,156.6],[15.0,167.8],[16.0,179.0],[17.0,190.2],[18.0,201.3],[19.0,212.5],[20.0,223.7],[21.0,234.9],[22.0,246.1],[23.0,257.3],[24.0,268.5],[25.0,279.6],[26.0,290.8],[27.0,302.0],[28.0,313.2],[29.0,324.4],[31.0,346.8],[32.0,357.9],[33.0,369.1],[34.0,380.3],[35.0,391.5],[36.0,402.7],[37.0,413.9],[38.0,425.1],[39.0,436.2],[40.0,447.4],[41.0,458.6],[42.0,469.8],[43.0,481.0],[44.7,500.0],[45.0,504.9],[46.0,521.1],[47.0,537.3],[48.0,553.6],[49.0,569.8],[50.0,586.0],[51.0,602.3],[52.0,618.5],[53.0,634.7],[54.0,651.0],[55.0,667.2],[56.0,683.4],[57.0,699.7],[58.0,715.9],[59.0,732.1],[60.0,748.4],[61.0,764.6],[62.0,780.8],[63.0,797.1],[64.0,813.3],[65.0,829.5],[66.0,845.8],[68.0,878.2],[69.0,894.5],[70.0,910.7],[71.0,926.9],[72.0,943.2],[73.0,959.4],[74.0,975.6],[75.5,1000.0],[76.0,1008.3],[77.0,1024.8],[78.0,1041.4],[79.0,1057.9],[80.0,1074.5],[81.0,1091.1],[82.0,1107.6],[83.0,1124.2],[84.0,1140.7],[85.0,1157.3],[86.0,1173.8],[87.0,1190.4],[88.0,1207.0],[89.0,1223.5],[90.0,1240.1],[91.0,1256.6],[92.0,1273.2],[93.0,1289.7],[94.0,1306.3],[95.0,1322.8],[96.0,1339.4],[97.0,1356.0],[98.0,1372.5],[99.0,1389.1],[100.0,1405.6],[101.0,1422.2],[102.0,1438.7],[103.0,1455.3],[104.0,1471.9],[105.0,1488.4],[105.7,1500.0],[106.0,1504.5],[107.0,1519.4],[108.0,1534.3],[109.0,1549.2],[110.0,1564.1],[111.0,1579.0],[112.0,1593.9],[113.0,1608.8],[114.0,1623.7],[115.0,1638.6],[116.0,1653.5],[117.0,1668.4],[118.0,1683.3],[119.0,1698.2],[120.0,1713.1],[121.0,1728.0],[122.0,1742.9],[123.0,1757.8],[124.0,1772.7],[125.0,1787.6],[126.0,1802.5],[128.0,1832.3],[129.0,1847.2],[130.0,1862.1],[131.0,1877.0],[132.0,1891.9],[134.0,1921.7],[135.0,1936.6],[135.9,1950.0],[136.4,1955.0],[136.8,1960.0],[137.3,1965.0],[137.7,1970.0],[138.3,1975.0],[138.8,1980.0],[139.3,1985.0],[139.8,1990.0],[140.4,1995.0],[140.9,2000.0],[141.5,2005.0],[142.1,2010.0],[142.6,2015.0],[143.1,2020.0],[143.6,2025.0],[144.1,2030.0],[144.7,2035.0],[145.8,2045.0],[146.3,2050.0],[147.5,2060.0]]
+  ] },
+  'QAA-2657': { compartimentos: [
+    [[0.0,0.0],[1.0,28.6],[2.0,57.1],[3.0,85.7],[4.0,114.3],[5.0,142.9],[6.0,171.4],[7.0,200.0],[8.0,228.6],[9.0,257.1],[10.0,285.7],[11.0,314.3],[12.0,342.9],[13.0,371.4],[14.0,400.0],[15.0,428.6],[16.0,457.1],[17.0,485.7],[17.5,500.0],[18.0,524.3],[19.0,572.8],[20.0,621.4],[21.0,669.9],[22.0,718.4],[23.0,767.0],[24.0,815.5],[25.0,864.1],[26.0,912.6],[27.0,961.2],[27.8,1000.0],[28.0,1012.3],[29.0,1074.1],[30.0,1135.8],[31.0,1197.5],[32.0,1259.3],[33.0,1321.0],[34.0,1382.7],[35.0,1444.4],[35.9,1500.0],[36.0,1506.2],[37.0,1567.9],[38.0,1629.6],[39.0,1691.4],[40.0,1753.1],[41.0,1814.8],[42.0,1876.5],[43.0,1938.3],[44.0,2000.0],[45.0,2069.4],[46.0,2138.9],[47.0,2208.3],[48.0,2277.8],[49.0,2347.2],[50.0,2416.7],[51.0,2486.1],[51.2,2500.0],[52.0,2557.1],[53.0,2628.6],[54.0,2700.0],[55.0,2771.4],[56.0,2842.9],[57.0,2914.3],[58.0,2985.7],[58.2,3000.0],[59.0,3058.0],[60.0,3130.4],[61.0,3202.9],[62.0,3275.4],[63.0,3347.8],[64.0,3420.3],[65.0,3492.8],[65.1,3500.0],[66.0,3567.2],[67.0,3641.8],[68.0,3716.4],[69.0,3791.0],[70.0,3865.7],[71.0,3940.3],[71.8,4000.0],[72.0,4015.4],[73.0,4092.3],[74.0,4169.2],[75.0,4246.2],[76.0,4323.1],[77.0,4400.0],[78.0,4476.9],[78.3,4500.0],[79.0,4555.6],[80.0,4634.9],[81.0,4714.3],[82.0,4793.7],[83.0,4873.0],[84.0,4952.4],[84.6,5000.0],[85.0,5029.4],[86.0,5102.9],[87.0,5176.5],[88.0,5250.0],[89.0,5323.5],[90.0,5397.1],[91.0,5470.6],[91.4,5500.0],[92.0,5547.6],[93.0,5627.0],[94.0,5706.3],[95.0,5785.7],[96.0,5865.1],[97.0,5944.4],[97.7,6000.0],[98.0,6023.1],[99.0,6100.0],[100.0,6176.9],[101.0,6253.8],[102.0,6330.8],[103.0,6407.7],[104.0,6484.6],[104.2,6500.0],[105.0,6559.7],[106.0,6634.3],[107.0,6709.0],[108.0,6783.6],[109.0,6858.2],[110.0,6932.8],[110.9,7000.0],[111.0,7007.2],[112.0,7079.7],[113.0,7152.2],[114.0,7224.6],[115.0,7297.1],[116.0,7369.6],[117.0,7442.0],[117.8,7500.0],[118.0,7514.3],[119.0,7585.7],[120.0,7657.1],[121.0,7728.6],[122.0,7800.0],[123.0,7871.4],[124.0,7942.9],[124.8,8000.0],[125.0,8012.2],[126.0,8073.2],[127.0,8134.1],[128.0,8195.1],[129.0,8256.1],[130.0,8317.1],[131.0,8378.0],[132.0,8439.0],[133.0,8500.0],[134.0,8568.5],[135.0,8637.0],[136.0,8705.5],[137.0,8774.0],[138.0,8842.5],[139.0,8911.0],[140.0,8979.5],[140.3,9000.0],[141.0,9039.8],[142.0,9096.6],[143.0,9153.4],[144.0,9210.2],[145.0,9267.0],[146.0,9323.9],[147.0,9380.7],[148.0,9437.5],[149.0,9494.3],[149.1,9500.0],[150.0,9543.5],[151.0,9591.9],[152.0,9640.3],[153.0,9688.7],[154.0,9737.1],[155.0,9785.5],[156.0,9833.9],[157.0,9882.3],[158.0,9930.6],[158.4,9950.0],[158.6,9955.0],[158.7,9960.0],[158.9,9965.0],[159.0,9970.0],[159.2,9975.0],[159.3,9980.0],[159.5,9985.0],[159.6,9990.0],[159.8,9995.0],[159.9,10000.0],[160.0,10005.0],[160.1,10010.0],[160.3,10015.0],[160.4,10020.0],[160.6,10025.0],[160.7,10030.0],[160.9,10035.0],[161.0,10040.0],[161.2,10045.0],[161.3,10050.0],[162.0,10085.0],[162.3,10100.0],[163.0,10122.6],[164.0,10154.8],[165.0,10187.1],[165.4,10200.0],[166.0,10211.5],[167.0,10230.8],[168.0,10250.0],[168.2,10255.0],[168.3,10260.0],[168.5,10265.0],[168.6,10270.0],[168.7,10275.0],[168.8,10280.0],[169.0,10285.0],[169.1,10290.0],[169.3,10295.0],[169.4,10300.0]]
+  ] },
+  'QAA-2921': { compartimentos: [
+    [[1.0,12.2],[3.0,36.7],[4.0,48.9],[5.0,61.1],[6.0,73.3],[7.0,85.6],[9.0,110.0],[10.0,122.2],[11.0,134.5],[12.0,146.7],[13.0,158.9],[14.0,171.1],[15.0,183.4],[17.0,207.8],[18.0,220.0],[19.0,232.3],[20.0,244.5],[21.0,256.7],[22.0,268.9],[23.0,281.2],[24.0,293.4],[25.0,305.6],[26.0,317.8],[27.0,330.1],[28.0,342.3],[29.0,354.5],[30.0,366.7],[31.0,379.0],[32.0,391.2],[33.0,403.4],[34.0,415.6],[35.0,427.9],[37.0,452.3],[41.0,501.8],[42.0,520.0],[43.0,538.2],[45.0,574.5],[46.0,592.7],[47.0,610.9],[48.0,629.1],[49.0,647.3],[50.0,665.5],[51.0,683.6],[52.0,701.8],[53.0,720.0],[54.0,738.2],[55.0,756.4],[56.0,774.5],[57.0,792.7],[58.0,810.9],[59.0,829.1],[60.0,847.3],[62.0,883.6],[63.0,901.8],[64.0,920.0],[65.0,938.2],[66.0,956.4],[67.0,974.5],[68.0,992.7],[68.4,1000.0],[69.0,1011.9],[70.0,1031.7],[72.0,1071.4],[73.0,1091.3],[74.0,1111.1],[75.0,1131.0],[77.0,1170.6],[78.0,1190.5],[79.0,1210.3],[80.0,1230.2],[81.0,1250.0],[82.0,1269.8],[83.0,1289.7],[84.0,1309.5],[85.0,1329.4],[86.0,1349.2],[87.0,1369.0],[88.0,1388.9],[90.0,1428.6],[91.0,1448.4],[92.0,1468.3],[93.6,1500.0],[94.0,1507.4],[95.0,1525.9],[96.0,1544.4],[97.0,1563.0],[98.0,1581.5],[99.0,1600.0],[100.0,1618.5],[101.0,1637.0],[102.0,1655.6],[104.0,1692.6],[105.0,1711.1],[108.0,1766.7],[109.0,1785.2],[111.0,1822.2],[112.0,1840.7],[113.0,1859.3],[114.0,1877.8],[115.0,1896.3],[116.0,1914.8],[117.0,1933.3],[118.0,1951.9],[119.0,1970.4],[120.0,1988.9],[121.0,2006.0],[122.0,2021.1],[123.0,2036.2],[124.0,2051.3],[125.0,2066.4],[126.0,2081.5],[127.0,2096.6],[128.0,2111.7],[129.0,2126.8],[130.0,2141.9],[131.0,2157.0],[132.0,2172.1],[133.0,2187.2],[134.0,2202.3],[135.0,2217.4],[136.0,2232.6],[137.0,2247.7],[138.0,2262.8],[139.0,2277.9],[140.0,2293.0],[141.0,2308.1],[142.0,2323.2],[143.0,2338.3],[144.0,2353.4],[145.0,2368.5],[146.0,2383.6],[147.0,2398.7],[148.0,2413.8],[149.0,2428.9],[150.0,2444.0],[150.4,2450.0],[150.8,2455.0],[151.1,2460.0],[152.0,2470.0],[152.5,2475.0],[152.9,2480.0],[153.5,2485.0],[154.1,2490.0],[154.7,2495.0],[155.8,2505.0],[156.3,2510.0],[156.9,2515.0],[157.5,2520.0],[158.2,2525.0],[158.9,2530.0],[159.6,2535.0],[160.9,2545.0]],
+    [[0.0,0.0],[1.0,12.4],[2.0,24.8],[3.0,37.2],[4.0,49.6],[5.0,62.0],[6.0,74.4],[7.0,86.8],[8.0,99.3],[9.0,111.7],[10.0,124.1],[11.0,136.5],[12.0,148.9],[13.0,161.3],[14.0,173.7],[15.0,186.1],[16.0,198.5],[17.0,210.9],[18.0,223.3],[21.0,260.5],[22.0,273.0],[23.0,285.4],[24.0,297.8],[25.0,310.2],[26.0,322.6],[27.0,335.0],[28.0,347.4],[29.0,359.8],[30.0,372.2],[32.0,397.0],[33.0,409.4],[34.0,421.8],[35.0,434.2],[36.0,446.7],[37.0,459.1],[38.0,471.5],[39.0,483.9],[40.0,496.3],[40.3,500.0],[41.0,513.0],[42.0,531.6],[43.0,550.2],[44.0,568.8],[46.0,605.9],[47.0,624.5],[48.0,643.1],[49.0,661.7],[50.0,680.3],[51.0,698.9],[52.0,717.5],[53.0,736.1],[54.0,754.6],[55.0,773.2],[56.0,791.8],[57.0,810.4],[58.0,829.0],[59.0,847.6],[60.0,866.2],[61.0,884.8],[62.0,903.3],[63.0,921.9],[64.0,940.5],[66.0,977.7],[67.0,996.3],[67.2,1000.0],[68.0,1015.1],[69.0,1035.3],[70.0,1054.9],[71.0,1074.5],[72.0,1094.1],[73.0,1113.7],[74.0,1133.3],[75.0,1152.9],[76.0,1172.5],[77.0,1192.2],[78.0,1211.8],[79.0,1231.4],[80.0,1251.0],[81.0,1270.6],[82.0,1290.2],[83.0,1309.8],[86.0,1368.6],[87.0,1388.2],[88.0,1407.8],[89.0,1427.5],[90.0,1447.1],[91.0,1466.7],[92.0,1486.3],[92.7,1500.0],[93.0,1505.8],[94.0,1525.0],[95.0,1544.2],[96.0,1563.5],[97.0,1582.7],[98.0,1601.9],[99.0,1621.2],[100.0,1640.4],[101.0,1659.6],[102.0,1678.8],[103.0,1698.1],[104.0,1717.3],[105.0,1736.5],[106.0,1755.8],[107.0,1775.0],[109.0,1813.5],[110.0,1832.7],[111.0,1851.9],[112.0,1871.2],[114.0,1909.6],[115.0,1928.8],[116.0,1948.1],[117.0,1967.3],[118.0,1986.5],[118.7,2000.0],[119.0,2004.6],[121.0,2035.0],[122.0,2050.2],[123.0,2065.4],[124.0,2080.6],[125.0,2095.8],[126.0,2111.0],[127.0,2126.2],[128.0,2141.4],[129.0,2156.6],[130.0,2171.8],[131.0,2187.0],[132.0,2202.2],[133.0,2217.4],[135.0,2247.8],[136.0,2263.0],[137.0,2278.2],[138.0,2293.4],[139.0,2308.6],[140.0,2323.8],[141.0,2339.0],[142.0,2354.2],[143.0,2369.4],[144.0,2384.6],[145.0,2399.8],[146.0,2415.0],[147.0,2430.2],[148.0,2445.4],[148.3,2450.0],[148.7,2455.0],[149.1,2460.0],[149.4,2465.0],[149.7,2470.0],[150.2,2475.0],[151.2,2485.0],[151.7,2490.0],[152.3,2495.0],[152.8,2500.0],[153.4,2505.0],[153.9,2510.0],[154.5,2515.0],[155.0,2520.0],[155.6,2525.0],[156.2,2530.0],[157.3,2540.0],[157.9,2545.0],[158.4,2550.0]],
+    [[0.0,0.0],[1.0,12.4],[2.0,24.8],[3.0,37.2],[4.0,49.6],[5.0,62.0],[6.0,74.4],[7.0,86.8],[8.0,99.3],[9.0,111.7],[10.0,124.1],[11.0,136.5],[12.0,148.9],[13.0,161.3],[14.0,173.7],[15.0,186.1],[16.0,198.5],[17.0,210.9],[18.0,223.3],[19.0,235.7],[20.0,248.1],[21.0,260.5],[22.0,273.0],[23.0,285.4],[24.0,297.8],[25.0,310.2],[26.0,322.6],[27.0,335.0],[28.0,347.4],[29.0,359.8],[30.0,372.2],[31.0,384.6],[32.0,397.0],[33.0,409.4],[34.0,421.8],[35.0,434.2],[36.0,446.7],[37.0,459.1],[38.0,471.5],[39.0,483.9],[40.0,496.3],[40.3,500.0],[41.0,512.9],[42.0,531.4],[43.0,549.8],[44.0,568.3],[45.0,586.7],[46.0,605.2],[47.0,623.6],[48.0,642.1],[49.0,660.5],[50.0,679.0],[51.0,697.4],[52.0,715.9],[53.0,734.3],[54.0,752.8],[55.0,771.2],[56.0,789.7],[57.0,808.1],[58.0,826.6],[59.0,845.0],[60.0,863.5],[61.0,881.9],[62.0,900.4],[63.0,918.8],[64.0,937.3],[65.0,955.7],[66.0,974.2],[67.0,992.6],[67.4,1000.0],[68.0,1012.0],[69.0,1032.1],[70.0,1052.2],[71.0,1072.3],[72.0,1092.4],[73.0,1112.4],[74.0,1132.5],[75.0,1152.6],[76.0,1172.7],[77.0,1192.8],[78.0,1212.9],[79.0,1232.9],[80.0,1253.0],[81.0,1273.1],[82.0,1293.2],[83.0,1313.3],[84.0,1333.3],[85.0,1353.4],[86.0,1373.5],[87.0,1393.6],[88.0,1413.7],[89.0,1433.7],[90.0,1453.8],[91.0,1473.9],[92.0,1494.0],[92.3,1500.0],[93.0,1513.2],[94.0,1532.1],[95.0,1550.9],[96.0,1569.8],[97.0,1588.7],[98.0,1607.5],[99.0,1626.4],[100.0,1645.3],[101.0,1664.2],[102.0,1683.0],[103.0,1701.9],[104.0,1720.8],[105.0,1739.6],[106.0,1758.5],[107.0,1777.4],[108.0,1796.2],[109.0,1815.1],[110.0,1834.0],[111.0,1852.8],[112.0,1871.7],[113.0,1890.6],[114.0,1909.4],[115.0,1928.3],[116.0,1947.2],[117.0,1966.0],[118.0,1984.9],[118.8,2000.0],[119.0,2003.0],[120.0,2018.2],[121.0,2033.3],[122.0,2048.5],[123.0,2063.6],[124.0,2078.8],[125.0,2093.9],[126.0,2109.1],[127.0,2124.2],[128.0,2139.4],[129.0,2154.5],[130.0,2169.7],[131.0,2184.8],[132.0,2200.0],[133.0,2215.2],[134.0,2230.3],[135.0,2245.5],[136.0,2260.6],[137.0,2275.8],[138.0,2290.9],[139.0,2306.1],[140.0,2321.2],[141.0,2336.4],[142.0,2351.5],[143.0,2366.7],[144.0,2381.8],[145.0,2397.0],[146.0,2412.1],[147.0,2427.3],[148.0,2442.4],[148.5,2500.0],[148.9,2480.0],[149.2,2460.0],[149.6,2465.0],[150.0,2470.0],[150.4,2475.0],[150.8,2480.0],[151.4,2485.0],[152.0,2490.0],[152.6,2495.0],[153.2,2500.0],[153.8,2505.0],[154.3,2510.0],[155.0,2515.0],[155.6,2520.0],[156.2,2525.0],[156.8,2530.0],[157.5,2535.0],[158.2,2540.0],[159.0,2545.0],[159.8,2550.0]],
+    [[0.0,0.0],[1.0,12.7],[2.0,25.4],[3.0,38.1],[4.0,50.8],[5.0,63.5],[6.0,76.1],[7.0,88.8],[8.0,101.5],[9.0,114.2],[10.0,126.9],[11.0,139.6],[12.0,152.3],[13.0,165.0],[14.0,177.7],[15.0,190.4],[16.0,203.0],[17.0,215.7],[18.0,228.4],[19.0,241.1],[20.0,253.8],[21.0,266.5],[22.0,279.2],[23.0,291.9],[24.0,304.6],[25.0,317.3],[26.0,329.9],[27.0,342.6],[28.0,355.3],[29.0,368.0],[30.0,380.7],[31.0,393.4],[32.0,406.1],[33.0,418.8],[34.0,431.5],[35.0,444.2],[36.0,456.9],[37.0,469.5],[38.0,482.2],[39.0,494.9],[39.4,500.0],[40.0,511.2],[41.0,529.7],[42.0,548.3],[43.0,566.9],[44.0,585.5],[45.0,604.1],[46.0,622.7],[47.0,641.3],[48.0,659.9],[49.0,678.4],[50.0,697.0],[51.0,715.6],[52.0,734.2],[53.0,752.8],[54.0,771.4],[55.0,790.0],[56.0,808.6],[57.0,827.1],[58.0,845.7],[59.0,864.3],[60.0,882.9],[61.0,901.5],[62.0,920.1],[63.0,938.7],[64.0,957.2],[65.0,975.8],[66.0,994.4],[66.3,1000.0],[67.0,1013.8],[68.0,1033.5],[69.0,1053.1],[70.0,1072.8],[71.0,1092.5],[72.0,1112.2],[73.0,1131.9],[74.0,1151.6],[75.0,1171.3],[76.0,1190.9],[77.0,1210.6],[78.0,1230.3],[79.0,1250.0],[80.0,1269.7],[81.0,1289.4],[82.0,1309.1],[83.0,1328.7],[84.0,1348.4],[85.0,1368.1],[86.0,1387.8],[87.0,1407.5],[88.0,1427.2],[89.0,1446.9],[90.0,1466.5],[91.0,1486.2],[91.7,1500.0],[92.0,1505.6],[93.0,1524.3],[94.0,1543.1],[95.0,1561.8],[96.0,1580.5],[97.0,1599.3],[98.0,1618.0],[99.0,1636.7],[100.0,1655.4],[101.0,1674.2],[102.0,1692.9],[103.0,1711.6],[104.0,1730.3],[105.0,1749.1],[106.0,1767.8],[107.0,1786.5],[108.0,1805.2],[109.0,1824.0],[110.0,1842.7],[111.0,1861.4],[112.0,1880.1],[113.0,1898.9],[114.0,1917.6],[115.0,1936.3],[116.0,1955.1],[117.0,1973.8],[118.0,1992.5],[118.4,2000.0],[119.0,2009.1],[120.0,2024.2],[121.0,2039.3],[122.0,2054.4],[123.0,2069.5],[124.0,2084.6],[125.0,2099.7],[126.0,2114.8],[127.0,2129.9],[128.0,2145.0],[129.0,2160.1],[130.0,2175.2],[131.0,2190.3],[132.0,2205.4],[133.0,2220.5],[134.0,2235.6],[135.0,2250.7],[136.0,2265.8],[137.0,2280.9],[138.0,2296.0],[139.0,2311.1],[140.0,2326.2],[141.0,2341.3],[142.0,2356.4],[143.0,2371.5],[144.0,2386.6],[145.0,2401.7],[146.0,2416.8],[147.0,2431.9],[148.0,2447.0],[148.2,2500.0],[148.6,2480.0],[148.9,2460.0],[149.3,2465.0],[149.7,2470.0],[150.2,2475.0],[150.6,2480.0],[151.1,2485.0],[151.6,2490.0],[152.2,2495.0],[152.7,2500.0],[153.3,2505.0],[153.8,2510.0],[154.4,2515.0],[154.9,2520.0],[155.4,2525.0],[155.9,2530.0],[156.5,2535.0],[157.1,2540.0],[157.7,2545.0],[158.3,2550.0]]
+  ] },
+  'QAA-2989': { compartimentos: [
+    [[0.0,0.0],[1.0,28.4],[3.0,85.2],[4.0,113.6],[5.0,142.0],[6.0,170.5],[7.0,198.9],[8.0,227.3],[9.0,255.7],[10.0,284.1],[11.0,312.5],[12.0,340.9],[13.0,369.3],[14.0,397.7],[15.0,426.1],[16.0,454.5],[17.0,483.0],[17.6,500.0],[19.0,568.0],[21.0,665.0],[22.0,713.6],[23.0,762.1],[24.0,810.7],[25.0,859.2],[26.0,907.8],[27.0,956.3],[27.9,1000.0],[28.0,1006.2],[29.0,1067.9],[31.0,1191.4],[32.0,1253.1],[33.0,1314.8],[34.0,1376.5],[35.0,1438.3],[36.0,1500.0],[37.0,1561.7],[43.0,1932.1],[44.0,1993.8],[44.1,2000.0],[45.0,2063.4],[47.0,2204.2],[49.0,2345.1],[51.0,2485.9],[51.2,2500.0],[52.0,2557.1],[53.0,2628.6],[54.0,2700.0],[55.0,2771.4],[56.0,2842.9],[57.0,2914.3],[58.0,2985.7],[58.2,3000.0],[59.0,3057.1],[60.0,3128.6],[61.0,3200.0],[62.0,3271.4],[63.0,3342.9],[64.0,3414.3],[65.2,3500.0],[66.0,3559.7],[67.0,3634.3],[68.0,3709.0],[69.0,3783.6],[71.0,3932.8],[71.9,4000.0],[73.0,4084.6],[74.0,4161.5],[77.0,4392.3],[78.0,4469.2],[78.4,4500.0],[79.0,4547.6],[80.0,4627.0],[81.0,4706.3],[82.0,4785.7],[83.0,4865.1],[84.0,4944.4],[84.7,5000.0],[85.0,5022.1],[86.0,5095.6],[87.0,5169.1],[88.0,5242.6],[89.0,5316.2],[91.0,5463.2],[91.5,5500.0],[93.0,5619.0],[94.0,5698.4],[95.0,5777.8],[96.0,5857.1],[97.0,5936.5],[97.8,6000.0],[98.0,6015.4],[99.0,6092.3],[100.0,6169.2],[101.0,6246.2],[102.0,6323.1],[103.0,6400.0],[104.0,6476.9],[104.3,6500.0],[105.0,6552.2],[106.0,6626.9],[107.0,6701.5],[108.0,6776.1],[109.0,6850.7],[110.0,6925.4],[111.0,7000.0],[112.0,7072.5],[113.0,7144.9],[115.0,7289.9],[116.0,7362.3],[117.0,7434.8],[117.9,7500.0],[118.0,7507.1],[119.0,7578.6],[120.0,7650.0],[121.0,7721.4],[122.0,7792.9],[123.0,7864.3],[124.0,7935.7],[124.9,8000.0],[125.0,8006.1],[126.0,8067.1],[127.0,8128.0],[130.0,8311.0],[131.0,8372.0],[132.0,8432.9],[133.0,8493.9],[133.1,8500.0],[134.0,8561.6],[135.0,8630.1],[136.0,8698.6],[137.0,8767.1],[138.0,8835.6],[139.0,8904.1],[140.0,8972.6],[140.4,9000.0],[141.0,9034.1],[142.0,9090.9],[143.0,9147.7],[144.0,9204.5],[145.0,9261.4],[146.0,9318.2],[147.0,9375.0],[148.0,9431.8],[149.0,9488.6],[150.0,9538.7],[151.0,9587.1],[152.0,9635.5],[153.0,9683.9],[154.0,9732.3],[156.0,9829.0],[157.0,9877.4],[158.0,9925.8],[158.5,9950.0],[158.6,9955.0],[158.7,9960.0],[158.9,9965.0],[159.0,9970.0],[159.2,9975.0],[159.3,9980.0],[159.5,9985.0],[159.6,9990.0],[160.0,10005.0],[160.1,10010.0],[160.3,10015.0],[160.5,10025.0],[160.6,10030.0],[160.8,10035.0],[161.0,10040.0],[161.2,10045.0],[161.4,10050.0],[162.0,10063.0],[163.0,10084.8],[163.7,10100.0],[164.0,10108.1],[165.0,10135.1],[166.0,10162.2],[167.0,10189.2],[167.4,10200.0],[167.6,10205.0],[167.8,10210.0],[168.1,10215.0],[168.3,10220.0],[168.5,10225.0],[168.7,10230.0],[168.9,10235.0],[169.1,10240.0],[169.4,10245.0],[169.6,10250.0],[169.8,10255.0],[170.0,10260.0],[170.2,10265.0],[170.4,10270.0],[170.6,10275.0],[170.8,10280.0],[171.1,10285.0],[171.3,10290.0],[171.5,10295.0],[171.7,10300.0]]
+  ] },
+  'QAA-1331': { compartimentos: [
+    [[0.0,0],[0.5,13.37],[1.0,26.74],[1.5,40.11],[2.0,53.48],[2.5,66.84],[3.0,80.21],[3.5,93.58],[4.0,106.95],[4.5,120.32],[5.0,133.69],[5.5,147.06],[6.0,160.43],[6.5,173.8],[7.0,187.17],[7.5,200.53],[8.0,213.9],[8.5,227.27],[9.0,240.64],[9.5,254.01],[10.0,267.38],[10.5,280.75],[11.0,294.12],[11.5,307.49],[12.0,320.86],[12.5,334.22],[13.0,347.59],[13.5,360.96],[14.0,374.33],[14.5,387.7],[15.0,401.07],[15.5,414.44],[16.0,427.81],[16.5,441.18],[17.0,454.55],[17.5,467.91],[18.0,481.28],[18.5,494.65],[18.7,500.0],[19.0,513.89],[19.5,537.04],[20.0,560.19],[20.5,583.33],[21.0,606.48],[21.5,629.63],[22.0,652.78],[22.5,675.93],[23.0,699.07],[23.5,722.22],[24.0,745.37],[24.5,768.52],[25.0,791.67],[25.5,814.81],[26.0,837.96],[26.5,861.11],[27.0,884.26],[27.5,907.41],[28.0,930.56],[28.5,953.7],[29.0,976.85],[29.5,1000.0],[30.0,1027.47],[30.5,1054.95],[31.0,1082.42],[31.5,1109.89],[32.0,1137.36],[32.5,1164.84],[33.0,1192.31],[33.5,1219.78],[34.0,1247.25],[34.5,1274.73],[35.0,1302.2],[35.5,1329.67],[36.0,1357.14],[36.5,1384.62],[37.0,1412.09],[37.5,1439.56],[38.0,1467.03],[38.5,1494.51],[38.6,1500.0],[39.0,1524.69],[39.5,1555.56],[40.0,1586.42],[40.5,1617.28],[41.0,1648.15],[41.5,1679.01],[42.0,1709.88],[42.5,1740.74],[43.0,1771.6],[43.5,1802.47],[44.0,1833.33],[44.5,1864.2],[45.0,1895.06],[45.5,1925.93],[46.0,1956.79],[46.5,1987.65],[46.7,2000.0],[47.0,2020.0],[47.5,2053.33],[48.0,2086.67],[48.5,2120.0],[49.0,2153.33],[49.5,2186.67],[50.0,2220.0],[50.5,2253.33],[51.0,2286.67],[51.5,2320.0],[52.0,2353.33],[52.5,2386.67],[53.0,2420.0],[53.5,2453.33],[54.0,2486.67],[54.2,2500.0],[54.5,2520.0],[55.0,2553.33],[55.5,2586.67],[56.0,2620.0],[56.5,2653.33],[57.0,2686.67],[57.5,2720.0],[58.0,2753.33],[58.5,2786.67],[59.0,2820.0],[59.5,2853.33],[60.0,2886.67],[60.5,2920.0],[61.0,2953.33],[61.5,2986.67],[61.7,3000.0],[62.0,3020.27],[62.5,3054.05],[63.0,3087.84],[63.5,3121.62],[64.0,3155.41],[64.5,3189.19],[65.0,3222.97],[65.5,3256.76],[66.0,3290.54],[66.5,3324.32],[67.0,3358.11],[67.5,3391.89],[68.0,3425.68],[68.5,3459.46],[69.0,3493.24],[69.1,3500.0],[69.5,3528.17],[70.0,3563.38],[70.5,3598.59],[71.0,3633.8],[71.5,3669.01],[72.0,3704.23],[72.5,3739.44],[73.0,3774.65],[73.5,3809.86],[74.0,3845.07],[74.5,3880.28],[75.0,3915.49],[75.5,3950.7],[76.0,3985.92],[76.2,4000.0],[76.5,4022.73],[77.0,4060.61],[77.5,4098.48],[78.0,4136.36],[78.5,4174.24],[79.0,4212.12],[79.5,4250.0],[80.0,4287.88],[80.5,4325.76],[81.0,4363.64],[81.5,4401.52],[82.0,4439.39],[82.5,4477.27],[82.8,4500.0],[83.0,4514.71],[83.5,4551.47],[84.0,4588.24],[84.5,4625.0],[85.0,4661.76],[85.5,4698.53],[86.0,4735.29],[86.5,4772.06],[87.0,4808.82],[87.5,4845.59],[88.0,4882.35],[88.5,4919.12],[89.0,4955.88],[89.5,4992.65],[89.6,5000.0],[90.0,5029.85],[90.5,5067.16],[91.0,5104.48],[91.5,5141.79],[92.0,5179.1],[92.5,5216.42],[93.0,5253.73],[93.5,5291.04],[94.0,5328.36],[94.5,5365.67],[95.0,5402.99],[95.5,5440.3],[96.0,5477.61],[96.3,5500.0],[96.5,5513.89],[97.0,5548.61],[97.5,5583.33],[98.0,5618.06],[98.5,5652.78],[99.0,5687.5],[99.5,5722.22],[100.0,5756.94],[100.5,5791.67],[101.0,5826.39],[101.5,5861.11],[102.0,5895.83],[102.5,5930.56],[103.0,5965.28],[103.5,6000.0],[104.0,6039.06],[104.5,6078.12],[105.0,6117.19],[105.5,6156.25],[106.0,6195.31],[106.5,6234.37],[107.0,6273.44],[107.5,6312.5],[108.0,6351.56],[108.5,6390.62],[109.0,6429.69],[109.5,6468.75],[109.9,6500.0],[110.0,6507.25],[110.5,6543.48],[111.0,6579.71],[111.5,6615.94],[112.0,6652.17],[112.5,6688.41],[113.0,6724.64],[113.5,6760.87],[114.0,6797.1],[114.5,6833.33],[115.0,6869.57],[115.5,6905.8],[116.0,6942.03],[116.5,6978.26],[116.8,7000.0],[117.0,7014.49],[117.5,7050.72],[118.0,7086.96],[118.5,7123.19],[119.0,7159.42],[119.5,7195.65],[120.0,7231.88],[120.5,7268.12],[121.0,7304.35],[121.5,7340.58],[122.0,7376.81],[122.5,7413.04],[123.0,7449.28],[123.5,7485.51],[123.7,7500.0],[124.0,7520.27],[124.5,7554.05],[125.0,7587.84],[125.5,7621.62],[126.0,7655.41],[126.5,7689.19],[127.0,7722.97],[127.5,7756.76],[128.0,7790.54],[128.5,7824.32],[129.0,7858.11],[129.5,7891.89],[130.0,7925.68],[130.5,7959.46],[131.0,7993.24],[131.1,8000.0],[131.5,8027.4],[132.0,8061.64],[132.5,8095.89],[133.0,8130.14],[133.5,8164.38],[134.0,8198.63],[134.5,8232.88],[135.0,8267.12],[135.5,8301.37],[136.0,8335.62],[136.5,8369.86],[137.0,8404.11],[137.5,8438.36],[138.0,8472.6],[138.4,8500.0],[138.5,8506.17],[139.0,8537.04],[139.5,8567.9],[140.0,8598.77],[140.5,8629.63],[141.0,8660.49],[141.5,8691.36],[142.0,8722.22],[142.5,8753.09],[143.0,8783.95],[143.5,8814.81],[144.0,8845.68],[144.5,8876.54],[145.0,8907.41],[145.5,8938.27],[146.0,8969.14],[146.5,9000.0],[147.0,9029.07],[147.5,9058.14],[148.0,9087.21],[148.5,9116.28],[149.0,9145.35],[149.5,9174.42],[150.0,9203.49],[150.5,9232.56],[151.0,9261.63],[151.5,9290.7],[152.0,9319.77],[152.5,9348.84],[153.0,9377.91],[153.5,9406.98],[154.0,9436.05],[154.5,9465.12],[155.0,9494.19],[155.1,9500.0],[155.5,9521.05],[156.0,9547.37],[156.5,9573.68],[157.0,9600.0],[157.5,9626.32],[158.0,9652.63],[158.5,9678.95],[158.9,9700.0],[159.0,9705.26],[159.5,9731.58],[160.0,9757.89],[160.5,9784.21],[160.8,9800.0],[161.0,9810.0],[161.5,9835.0],[162.0,9860.0],[162.5,9885.0],[162.8,9900.0],[163.0,9910.53],[163.5,9936.84],[164.0,9963.16],[164.5,9989.47],[164.7,10000.0],[165.0,10012.5],[165.5,10033.33],[166.0,10054.17],[166.5,10075.0],[167.0,10095.83],[167.1,10100.0],[167.5,10116.0],[168.0,10136.0],[168.5,10156.0],[169.0,10176.0],[169.5,10196.0],[169.6,10200.0],[170.0,10216.0],[170.5,10236.0],[171.0,10256.0],[171.5,10276.0],[172.0,10296.0],[172.1,10300.0],[172.5,10316.0]]
+  ] }
+};
+
+const conductoresMatriz = [
+ {empresa:'TNO',nombre:'CARRION MARTINEZ GALO PATRICIO',cedula:'2100391479',gin:'1900098874',licencia:'21/09/2030',pec:'22/09/2027',shaya:'12/04/2027',dtDrive:'08/05/2027',dtSlb:'05/04/2027',dthv:'05/04/2027'},
+ {empresa:'TNO',nombre:'CURIZACA PALAQUIBAY SEGUNDO CESAR',cedula:'602180465',gin:'1900102708',licencia:'23/05/2028',pec:'06/03/2027',shaya:'22/11/2027',dtDrive:'16/03/2027',dtSlb:'05/08/2028',dthv:'05/08/2027'},
+ {empresa:'TNO',nombre:'PATIÑO RODRIGUEZ EDWIN HERALDO',cedula:'1500730856',gin:'1900115480',licencia:'11/09/2030',pec:'03/06/2027',shaya:'22/11/2027',dtDrive:'16/03/2027',dtSlb:'16/03/2028',dthv:'16/03/2027'},
+ {empresa:'TNO',nombre:'PEREA VALENCIA PABLO CESAR',cedula:'1720756152',gin:'1900116115',licencia:'31/08/2027',pec:'13/11/2026',shaya:'09/07/2027',dtDrive:'02/11/2026',dtSlb:'30/04/2028',dthv:'02/11/2026'},
+ {empresa:'TNO',nombre:'RAMON PATIÑO CLAUDIO SEGUNDO',cedula:'2100223995',gin:'1900117576',licencia:'21/07/2029',pec:'13/03/2027',shaya:'29/09/2028',dtDrive:'05/02/2027',dtSlb:'05/08/2029',dthv:'05/02/2027'},
+ {empresa:'TNO',nombre:'VILLACRES VILLACRES HENRY RODRIGO',cedula:'1803034618',gin:'1900117578',licencia:'16/10/2028',pec:'04/09/2027',shaya:'09/07/2027',dtDrive:'05/02/2027',dtSlb:'05/08/2028',dthv:'05/02/2027'},
+ {empresa:'CETSO',nombre:'CELIO ENRIQUE PULLAS',cedula:'1710580661',gin:'1900112541',licencia:'11/07/2027',pec:'08/10/2027',shaya:'21/09/2027',dtDrive:'08/02/2027',dtSlb:'22/08/2028',dthv:'08/02/2028'},
+ {empresa:'CETSO',nombre:'ULBIO MESIAS CHAVEZ RAMOS',cedula:'201318144',gin:'1900064647',licencia:'04/05/2027',pec:'11/11/2026',shaya:'04/04/2027',dtDrive:'01/02/2027',dtSlb:'14/09/2028',dthv:'14/09/2027'},
+ {empresa:'SHIGAVITRANS',nombre:'VERA PUCHA RODRIGO FABIAN',cedula:'2100516257',gin:'1900037135',licencia:'23/04/2028',pec:'18/11/2026',shaya:'31/10/2026',dtDrive:'06/01/2027',dtSlb:'09/08/2027',dthv:''},
+ {empresa:'FRONTERAMAZ',nombre:'VARGAS OCHOA WALTER ALEXANDER',cedula:'2200276836',gin:'1900110726',licencia:'20/03/2028',pec:'16/07/2027',shaya:'17/10/2027',dtDrive:'06/01/2027',dtSlb:'04/05/2027',dthv:'17/01/2027'},
+ {empresa:'TRANSCAIMAN',nombre:'RAMIREZ MERA MANUEL ANDRES',cedula:'1311479172',gin:'1900067337',licencia:'27/04/2027',pec:'09/10/2027',shaya:'06/08/2027',dtDrive:'08/01/2027',dtSlb:'',dthv:'13/05/2027'}
+];
+
+const tanquerosMatriz = [
+ {empresa:'TNO',placa:'QAA-2925',capacidad:'10.000 gl',aforo:'06/03/2027',liberacion:'10/04/2027',kingpin:'05/03/2027',rueda5ta:'05/03/2027'},
+ {empresa:'TNO',placa:'QAA-2921',capacidad:'10.000 gl',aforo:'08/06/2027',liberacion:'23/11/2026',kingpin:'10/12/2026',rueda5ta:'09/03/2027'},
+ {empresa:'TNO',placa:'QAA-2924',capacidad:'10.000 gl',aforo:'06/03/2027',liberacion:'02/11/2026',kingpin:'05/03/2027',rueda5ta:'05/03/2027'},
+ {empresa:'TNO',placa:'QAA-3330',capacidad:'6.000 gl',aforo:'06/04/2028',liberacion:'30/11/2026',kingpin:'',rueda5ta:''},
+ {empresa:'CETSO',placa:'KAA-1756',capacidad:'6.000 gl',aforo:'11/07/2028',liberacion:'17/05/2027',kingpin:'19/10/2027',rueda5ta:'19/10/2027'},
+ {empresa:'SHIGAVITRANS',placa:'QAA-2896',capacidad:'6.000 gl',aforo:'11/02/2028',liberacion:'17/05/2027',kingpin:'',rueda5ta:''},
+ {empresa:'FRONTERAMAZ',placa:'QAA-2989',capacidad:'10.000 gl',aforo:'06/10/2028',liberacion:'03/04/2027',kingpin:'05/08/2027',rueda5ta:'18/11/2026'},
+ {empresa:'TRANSCAIMAN',placa:'QAA-3240',capacidad:'2.000 gl',aforo:'05/07/2027',liberacion:'02/01/2027',kingpin:'',rueda5ta:''}
+];
+
+const selC = document.getElementById('f_conductor');
+conductoresMatriz.forEach(c=>{ const o=document.createElement('option'); o.value=c.nombre; o.textContent=c.nombre+' — '+c.empresa; selC.appendChild(o); });
+const selP = document.getElementById('f_placa');
+tanquerosMatriz.forEach(t=>{ const o=document.createElement('option'); o.value=t.placa; o.textContent=t.placa+' — '+t.empresa+' ('+t.capacidad+')'; selP.appendChild(o); });
+
+function parseDMY(s){
+  if(!s) return null;
+  const p = s.split('/'); if(p.length!==3) return null;
+  const d = new Date(parseInt(p[2],10), parseInt(p[1],10)-1, parseInt(p[0],10));
+  return isNaN(d.getTime()) ? null : d;
+}
+function daysUntil(s){
+  const d = parseDMY(s); if(!d) return null;
+  const today = new Date(); today.setHours(0,0,0,0);
+  return Math.round((d-today)/86400000);
+}
+function classify(days){
+  if(days===null) return {label:'SIN REGISTRO', cls:'pend'};
+  if(days<0) return {label:'VENCIDO', cls:'red'};
+  if(days<=30) return {label:'VENCE PRONTO (≤30 días)', cls:'red'};
+  if(days<=60) return {label:'PRÓXIMO A VENCER', cls:'yellow'};
+  return {label:'VIGENTE', cls:'green'};
+}
+function docRow(label, dateStr){
+  const days = daysUntil(dateStr);
+  const c = classify(days);
+  const detalle = days===null ? '' : (days>=0 ? ' — faltan '+days+' días' : ' — venció hace '+Math.abs(days)+' días');
+  return '<div class="doc-status '+c.cls+'">'+label+': '+(dateStr||'sin registro')+detalle+' · <b>'+c.label+'</b></div>';
+}
+function peorEstado(fechas){
+  let peor = 3;
+  fechas.forEach(f=>{
+    const c = classify(daysUntil(f));
+    const rank = c.cls==='red'?0:c.cls==='yellow'?1:c.cls==='pend'?2:3;
+    if(rank<peor) peor=rank;
+  });
+  return peor;
+}
+
+function checkConductor(){
+  const val = document.getElementById('f_conductor').value.trim().toUpperCase();
+  const box = document.getElementById('statusConductor');
+  if(!val){ box.innerHTML=''; document.getElementById('f_conductor_id').value=''; document.getElementById('f_empresa_conductor').value=''; actualizarAlertaGlobal(); return; }
+  const match = conductoresMatriz.find(c=>c.nombre.toUpperCase()===val);
+  if(!match){
+    box.innerHTML = '<div class="doc-status-title">Validación documental — Conductor</div><div class="doc-status empty">No se encontró en la Matriz de Conductores y Tanqueros. Verificar documentación manualmente.</div>';
+    document.getElementById('f_conductor_id').value=''; document.getElementById('f_empresa_conductor').value='';
+    actualizarAlertaGlobal(); return;
+  }
+  document.getElementById('f_conductor_id').value = match.cedula || '';
+  document.getElementById('f_empresa_conductor').value = match.empresa;
+  let html = '<div class="doc-status-title">Validación documental — Conductor ('+match.empresa+')</div>';
+  html += docRow('Licencia', match.licencia);
+  html += docRow('Tarjeta PEC', match.pec);
+  html += docRow('Tarjeta SHAYA', match.shaya);
+  html += docRow('DT Commentary Drive Assessment', match.dtDrive);
+  html += docRow('DT SLB Driver', match.dtSlb);
+  html += docRow('DTHV Articulated Skill Assessment', match.dthv);
+  box.innerHTML = html;
+  actualizarAlertaGlobal();
+}
+function checkPlaca(){
+  const val = document.getElementById('f_placa').value.trim().toUpperCase();
+  const box = document.getElementById('statusPlaca');
+  if(!val){ box.innerHTML=''; document.getElementById('f_capacidad_matriz').value=''; document.getElementById('f_empresa_placa').value=''; buildVolumenRows(null); actualizarAlertaGlobal(); return; }
+  const match = tanquerosMatriz.find(t=>t.placa.toUpperCase()===val);
+  if(!match){
+    box.innerHTML = '<div class="doc-status-title">Validación documental — Unidad / Tanquero</div><div class="doc-status empty">No se encontró en la Matriz de Conductores y Tanqueros. Verificar documentación manualmente.</div>';
+    document.getElementById('f_capacidad_matriz').value = ''; document.getElementById('f_empresa_placa').value='';
+    buildVolumenRows(null); actualizarAlertaGlobal(); return;
+  }
+  document.getElementById('f_capacidad_matriz').value = match.capacidad;
+  document.getElementById('f_empresa_placa').value = match.empresa;
+  let html = '<div class="doc-status-title">Validación documental — Unidad / Tanquero ('+match.empresa+')</div>';
+  html += docRow('Tabla de Aforo', match.aforo);
+  html += docRow('Liberación de Tanquero', match.liberacion);
+  html += docRow('King Pin', match.kingpin);
+  html += docRow('5ta Rueda', match.rueda5ta);
+  box.innerHTML = html;
+  buildVolumenRows(val);
+  actualizarAlertaGlobal();
+}
+function actualizarAlertaGlobal(){
+  const banner = document.getElementById('alertaCumplimiento');
+  const conductorVal = document.getElementById('f_conductor').value.trim().toUpperCase();
+  const placaVal = document.getElementById('f_placa').value.trim().toUpperCase();
+  const mc = conductoresMatriz.find(c=>c.nombre.toUpperCase()===conductorVal);
+  const mt = tanquerosMatriz.find(t=>t.placa.toUpperCase()===placaVal);
+  let critico = false;
+  if(mc && peorEstado([mc.licencia,mc.pec,mc.shaya])===0) critico = true;
+  if(mt && peorEstado([mt.aforo,mt.liberacion,mt.kingpin,mt.rueda5ta])===0) critico = true;
+  if(critico){
+    banner.style.display='block';
+    banner.textContent = '⚠ ALERTA DE CUMPLIMIENTO: el conductor y/o el tanquero seleccionado tiene documentación vencida o por vencer en ≤30 días según la Matriz de Conductores y Tanqueros. Verificar antes de autorizar el despacho.';
+  } else {
+    banner.style.display='none';
+  }
+}
+document.getElementById('f_conductor').addEventListener('input', checkConductor);
+document.getElementById('f_conductor').addEventListener('change', checkConductor);
+document.getElementById('f_placa').addEventListener('input', checkPlaca);
+document.getElementById('f_placa').addEventListener('change', checkPlaca);
+
+const LOGO_B64 = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAgAAAQABAAD/wAARCAQMBAwDACIAAREBAhEB/9sAQwAIBgYHBgUIBwcHCQkICgwUDQwLCwwZEhMPFB0aHx4dGhwcICQuJyAiLCMcHCg3KSwwMTQ0NB8nOT04MjwuMzQy/9sAQwEJCQkMCwwYDQ0YMiEcITIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIy/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMAAAERAhEAPwD36jvRRQAUUUd6ACiiigAFGKKKACiiigAooooAKKKMUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAB3ooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACijvRQAUUUUAFFFFABRRRQAUUUUAFFFFABR3oooAKKKKACiiigAooooAKKKKAAUUUUAFFFFABRRRQAUUUd6ADFFAooAKKKKACiiigAooooAKKKKACiiigAooooAKDRRQAUUUUAFFFHegAooo70AFFFFABRRRQAUUUUAFGKKKACgUUYoAKKKKACiijvQAUUUUAFFFFABRRRQAtFFFACUUUUAGKKKKACiiigAxRRRQAUCjvRQAUUUYoAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACgUUUAFFFFAB3ooooAKMUUUAFFFFABRRRQAd6KKKACiiigAoooxQAUUUUAFFAooAKKKKADvR3oooAKKKO9ABRRRQAd6KKKACiiigAxR3oooAKKKKACiiigAooo70AFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFGKKACiiigAooo70AFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAB3ooooAKKKKACijFFABQKKKACiiigAooooAKKKKACiiigAooooAKMUUYoAO1GKKKACjvRRQAUUUd6ACiiigBaKKKAEo70UUAHeg0GigAooooAKKKKACiiigAooooAKKKKAAUUUUAFGKKKACiiigAooooAKKKBQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFHegAooooAKKKKACijFFABRRRQAUUUUAFFFFABR3oxRQAUUUUAFFFFABiijvRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABiijFFABRRRQAUUUUAFFFFABQaKKACjvRRQAUUUUAHeiiigAooooAKKKKACiiigAooooAKO9FFABR3oooAKKKKACiiigAoNFFABRRRQAUUUUAFFFFABRRRQAd6KKKACiiigA70UUUAFFHeigAoxRRQAtFFFACUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFGKACiiigAooooAO9FFFABRRRQAUUUUAFFFFABRRRQAYooooAKKKKACiiigAooooAKKKKACjvRRQAUUUUAFFFFABRRRQAUUUYoAKKKKACiiigAooooABRRRQAUUUUAFFFFABRRRQAUUUUAFFHeigAooo70AFFFFABRRRQAUUUUAFFFFABRQaKACiiigAooooAKKKKACiiigAooooAKKMUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUYoAKO9FFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFBoAKKKKACiijFAC0UUUAJRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFGKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAoFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRiiigAooxRQAUUUUAFFFFABRRRQAYooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKADNFFHegAooooAKKKKACiiigAooxRQAUUUUAFFFFABRRRQAUUUUAFFFFAC0UUUAJRRRQAUUUUAFBoooAKKKKACiiigAoooFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFHegAooo70AFFFFABRRRQAUUUd6ACiiigAoo70UAFFFFABRRRQAUUUUAFFFFABRRRQAUUd6KACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooo70AFFFFABRRRQAUUUUAFFFFABiiiigAooxRQAUUUUAFHeiigAoooxQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAC0UUUAJQaKO9ABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRmigAooooAKKKKACiijvQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUYooAKKKKACijvRQAUUUUAFFFFABRRR2oAKKKKACiiigAooooAKKKKACiiigAooooAKKMUUAFFFFABRRRQAUUUUAFGaKKACiiigAooooAKKKKACijvRQAUUd6KACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooo70AFFFFABRRRQAZooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKO9GKACiiigBaKKKAEooooAKKKKACiiigAooooAO9FFFAB3ooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKO9FAAKKO9FABRiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA70UUUAFFFFABRR3ooAKKKKACiiigAooooAKKKKACiiigAoo70UAFFFFABRRRQAUUUUAFFFGKACjFFFABRRRQAUUUUAFFFFABRRRQAd6KKMUAFFFFABRRRQAUUUUAFFFFABRRRQAUUd6KACiiigAooNFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUd6ACiiigAooooAWiiigBKKKKACiiigAooooAKKKKAA0UUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFHaigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKMUAFFFFABRRRQAUUUUAFFAooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAoFAooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACijvRQAUUUUAFFFFABRRRQAUUUUAFFFFAC0UUUAJRRRQAUUUUAFFFFABRRRQAUUUUAFFAooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAoFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFLzSUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABR3oooAKKKKACiiigAooooAKKKKACiiigAooooAMUUUYoAKKKKACiiigAoo70UAFFFFABRRRQAUZoooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAFooooASiiigAFFFFABRRRQAUUUUAFHeiigAo70UUAFFFFABRRRQAUUUUAHeiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA70UUUAFFFFABRRRQAUUd6KACiiigAooooAKKKMUAFFFFABRRRQAUUUUAFFFFABRQKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooFFABRRRQAUd6KKACiiigAooooAKKKKACiiigAooooAKKO9FABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFHeiigAooooAKKKKACiiigAooooAKKKKAFooooASiiigAooooAKKM0UAFFFFABigUYooAMUUUUAGKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACg0Ud6ACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigA70UUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUd6ACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAFooooASiiigAooooAKKKKACiiigAooooAKKMUUAFFFFAB3ooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiijvQAUUUUAFFFFABRRRQAYooooAKKKKACiiigAooxRQAUCiigAooooAKKBRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAYooooAKKKKACiiigAooooAKKKO9ABRRRQAUUUUAHeiiigAooooAKKKKACiiigAooxRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRmgAooooAKKKKACiiigAzRRRQAUUUUABo70UUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFGKKKACiiigBaKKKAEooooAKKBRQAUUUUAFFAooAKKKKACiiigAooooAKKKKACiigUAFFFFABQKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooFFABR3oooAKKKKACiiigAo70UUAFFFFABRRRQAUUUUAFFFFABRQKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooo70AFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUd6KKACiiigAooooAKKO9FAAKKKKACiiigAooooAKKKKACiijvQAUUUUAFFFFABRRRQAUUUUAFFFFAC0UUUAJRRRQAGiijvQAUUUUAFFFFABRRRQAUUUd6ACgUUUAFFFHegAzRRRQAUUUUAFFHejvQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUGgAooooABRSUtABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUYoooAKKKKACiiigAxRRRQAUUUUAFFFFABRRQaACiiigAooooAKKKKACiiigAooooAKKKKACiiigA7UUUUAFFFFABRRRQACiiigAooooAKKKKADvRQKKACjvRRQAUUUUAFFHagUAFFFFABRRR3oAKBRRQAUUUUAFFFFABRRRQAUUUUALRRRQAlFFFABRRRQAUUUUAFFFFAB3ooooAKKKKACiiigAooooAKKBRQAUUUUAFFFFABRRRQAUd6KKACijvRQACjvRRQAUUUUAFFFFABRRRQAUUtJQAd6M0UUAFFFFABRRRQAUUUUAFFFFABRQKKACiiigAooxRQAUUUUAFFFFABRRRQAUUUUAFFFFABiiiigAooxRQAUd6KKACiiigAooooAKKKKACiiigAooooAKKKKACjvRRQAUUUUAFFFFABijvRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRQKACiiigAo70UUAFFFFAB3oFFFABRRRQAUUUUAFFFFABiiiigAooooAKKKKACiiigAooooAKKKKAFooooASiiigAooooAKKKKACiiigAoxRRQAUUUUAFFFFABRRRQAUUYooAKKKKACiiigAoFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRR2oAKKKKACijvRQAUUUUAFFFFABRRRQAUUUUAFFFFAB2ooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKADvRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAC0UUUAJRRRQAUUd6KACiiigAooooAKKKMUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRigAoozRQAUUUUAFFFFABRRiigAooooAKKKKACijvQKACijvRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFBooAKKKKACiiigAooxRQAUUUUAFFFFABRRRQAUUYooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAFooooASiiigAooooAKKKKACjFFFABRRRQAUUUUAFHeiigAoFFFAB3ooooAKKKM0AFFFFABRRRQAUUUUAFFFFABRRRQAUUUd6ACiiigAooooAKKKKACiiigAooooAKKKKACijvR3oAKKKKACiiigAxRRRQAUUUUAFFHeigAooooAKKKBQAUUUUAFFGaKACiiigAooooAKKKBQAUUUUAFFFFABRRRQACiiigA70CiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAM0UUUAHeiijvQAUUUUAFFFAoAKKKKAAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFGKKKACiiigAooooAO9FHeigAooooAWiiigBKKKO9ABRRRQAUUUUAFFFFAB3ooooAKKSloAKKKKACiiigAooooAKKKKACigUUAFGKKKADvRRRQAUlLRQAUd6O9FABRRiigAooFJQAtFGKO9ABRRRQAUneil70AFFFFABRmiigAooooAKKKKACiiigAFFFFABmijFFABRRRQACijvRQAUZoFFABRRQKACjvRSd6AFoFGKKACiiigAo70UUAFFFFAB3ooo70AFFGKBQAUUUd6ACiiigAoo70UAFFFFABRRRQAUUUUAFFFFABRRR3oAKKKBQAUUUUAFFFFABRRRQAUUUUAFFFBoAKKKKACiiigA70d6KKACiiigAxRRRQAUUUUAFFHeigAooozQAUUd6KACiiigAooooAKKKKAFooooASiiigAooooAKKKKACiiigAoooFABRRQaACkpaKACiiigAxRR3ooAKKBRQAUUUUABoo70UAFFBooAKKKKACiiigAooFAoAKKKKADvRRRQACjtRR3oAKKKKACjvRRQAUUUUAFFJS0AFHeg0UAHeiigUAFAopKAFzRRRQAd6KKO9AB3ooooAKKKKACkpTRQAd6KMUUAFJS0lAC4opKWgAooooAMUUUUAFFFFABRRQKACikpaACijvRQAUUUUAFFFFABRRRQAUUCigAooooAKKKKACiijvQAUUUUAFFFFABRRRQAd6KKKACijvRQAUUUUAFFFFABRRRQAUYoooAKKKKACjvRRQAUUd6KACiiigAooooAKKKKACiiigAooooAWiiigBKKKO9ABRSUtABRmkpaACiiigAooooAKKSlxQAUUUUAJS96KMUAFJS0YoASloooAKKKKACjFFFABSUtHegAopKWgAo7UUUAFBoooAKKKSgBaKSloAO9FFFABRmkooAWiik70ALSUUtACUtJRQAtApKWgAooooAKSilNAB3oopKAFxRikpTQAUUneloASlpKKAFpKKKAClpKKAFxSUUUAKKKBR3oASlpKWgAoopKAClopKAFFJRS4oAKSlpKAFopKWgApKKWgAopO9LQAUUlFAC0UUUAFFHeigAopKWgAooFJQAtFJRQAtFHeigAoooNABRRRQAUlL3ooAKKO9FAB3oopKAFopKXvQAUUUUAFFFFABRRRQAUUUd6ACkpaKADNGKKKACgUUUAFAoooAKKKKAFooooASijvRQAUUlLQAUUUUAFFFFABRmiigAopKWgAoopKAFoo70d6ACiiigBKWkpaACiikoAWiiigAopKWgApKKWgApKKKAFooooAKSjvRQAtFFJQAUuKSjvQAtFJR3oAWkoooAXFJRS0AFJRS0AFFFJQAtJRRQAUUUtACUUUUALRSUUAFFFFAC0lFFAC0lFFAC0lFFAC0CkooAKWkooAKKKKACiiigBaSiigApaSigBTSUUUAL2pKKKAClpKKAFpKKO9AC0ZpKKAFopKKAFopKKAClpKKAFFFFJQAtFJS96ACiiigAooxSUAFLSUUALRiikoAWiigUAFFFJQAtFFFABiijvRQAUUUlAC0UUUAFFGaKADFFFFABRSUvegAoFFFABRiiigAooooAWiiigBtFLSUAFFFFABRRS0AFJRRQAUUUUAFLSUUALSUUUAFFFLQAUUlLQAlLSUtACUUtFACUUUUAFFLRQAlFFFABRRRQAUUUUALSUUUAHeiiigAooooAKKKKACiiloASiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiijI9aACijcPWmSTxxLueRFA7lgBQA+isqbxLodt/x8axp8X+/cov8zVWXxx4WiGW8QaaR/s3KMf0JovYpQk9EjforkpPib4Pj+9rUTH/AGIpG/ktRf8AC0/B/bU5T9LOb/4ip549zT6vWf2H9zOy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QcHBwNvtXd/Fmzu73w5p6WdndXTpqCuyW8LSsF8qUbiFBIGSBn3FAF/4X/8AJPdO/wCutz/6USV19cp8Nra4tPAlhDd281vMslwTFPG0bAGeQjKsARkEH6GuroGFFFLQAlLRRQAUd6KBQAlLSdqWgAFApKKAClo70UAJRRRQAUUtJQAtJS0UAJRRRQA6iiigBKKKKACiigUAFFFJQAtGaKSgBaMc0lLQAd6KKKACg0CigAooooAKKKKACiikoAKWigUAFFFFABRRRQAUUUlAC0UUUAMkDmNhGyq5B2swyAexIyM/nXj48IfEPw5PIdI1J7tJHaRmhuFG9mJLM0cvyhiSScE17GKKAPFr3QfiZ4hUWmpef9mY4ZZ7mCOI/wC8Islh7EGu+8FeC4PCdrLJJKLnUbgDzpguAoHREHZQSfcnk9gOrooAKKKSgBaKKKACiko70ALSYpaSgBaKO1FACUUUtABRSUtABiiiigBKWiigAopKKAFooooAKKSlzQAUUlFAC1n60NROiXq6T5f9oNCwtzI21Q5GAScHp16dq0KSgDxK78OfEfXUt9N1JLiS3icFXup4BGp6BmKfM+PoT+Nes+HdDg8OaFa6XbsXEK/PIRgyOTlmI9yScdulamB6UUALSUopKAFooooAKKSigBaKSloAKKKSgBaKKKACkpaKACkpcUlABS0UZoAKKKKACjFJRQAtFJ3ooAXvRQaSgBaSiloAKKKO1ABSUUtABRRRQAUlLmgUAJilopKAFpPz/OlooAKKKSgBaKSigApaSigApaKKACiijNABRSUtABSUUUAFFLRQAd6SiloAKBSUtABSUtJ3oAXNFFFAC0UUUAJRRSUALRRSUALSUUtABRRRQAlLR3pKAClpKWgApKXFJQAtFFFABRRRQAUUdqKACkpaTtQAUtFFABRRRQAUUlLQAZooooAO9FFFABSd6WkoAWjFFBoAKKSloAKSlpKAFpKWigBKWkpTQAUUUUAFGKKKACikpaAEopaKACiikoAWiikoAWkopaAEpaSlxQAd6DSUtACUUtFACUUtJQAUtJRQAtJRRQAUtJRQAUtJS0AFJS0CgAxRRSUALSUUtACUUd6KADvRS0lABS0lLQAUCkooAWik70GgBaSlooAKKKSgAopaSgBe9FFFACUtAooAKSiigApRSd6WgApKWigBKWkpaACkoo70ALSUUtABRR2ooAMUUlLQAYpKWigApKKO9AC0YpKKAFopKKACiloxQAUUUCgBaKKKAEooooATvS0UlAC0dqKKACiikoAWiikoAWkopaACijvRQAdqKO9BoAO9Ao70UAJS0UUAFFFFAB3ooooAKKKSgBaKO9BoAO9FFJQAtFJS0AFJS0lAC0d6KKACijvSUALRSUUAFFLRQAGikpaACikpRQAlLSUtABSUuKDQAUUlLQAUlFKaACiiigAooooASloooAKSloNABRSUtAAaKSigApaKSgBe9ApKWgBKWkpaACikpaACiikoAKKWkoAWikooAKWkpaAEpaSigBaKKSgApaKSgBaSloxQAUd6SloAKKKKACjvSUtABQKKKACkpaKACiikoAWikpaACkpaKAEpaSigBe9FJS96ACiiigAopKXNACd6WkpaACjFFFABRRRQAd6SlooAKKKKACiiigAooNHegBaKKKAEoooFABRRRQACiiigAo70UUAFHeiigAooooAKKKKACiiigAooooAKKKKACiiigAoFFFAAaKKKACg0UUAFJS0UAJRS0UAFJS0UAJS96KMUAJS0UUAJS0Ud6ACgUUd6ACikpaACijvRQAlLRRQAUlLRQAd6KKKAEopaKADtRR3oFABRRRigBKKWigApKWigA70d6O9FABSUtJQAd6KWkoAWkopaADNJS0UAJS96KKADNHeiigAooooASil70YoASilooABQaKO9ABSUtFABSUtFABR3oooAKKKMUAFFFFACUUtFABRmjvRQAd6KKKAE70d6WkoAO9Lig0UAHeiiigAoxRRQAlLQaKACiig0AFJS0UAFFHeigA70GjvR3oAKSlooAKKO9FABSUtFABRRRQAlLRRQAtFFFACUUUUAHeikpaACiiigAooooAKKSl70AFFJS0AFFFFAB3ooooAKO9FBoAKKKKACijvRQAUUUUAFHeg0UAFFFFABRQKKACiijvQAUUUUAFGKKKACiiigAo70Ud6ADtRRmigAo7UUUAFAoooAKKKKACijNJQAtFFFABRRRQAZoo70UAFFFFABRSUtAB3pKWigAFHeiigAoopKAFopKWgAopKWgAoooFABRRRQAUUfjRQAUUd6KACgUUUAFHegUUAFFGKKACiig0AFFFFABQKKKACiiigAFAoooADRRRQAUUUUAFFFFABSUtFAB3ooooAKKKKACijvRQAUd6KBQAUUUUAFFFJQAtFFFAB3ooooAKKKSgBaKKKAAUUUUAFFGKKACg0UUALRRRQAlGaKKACiijvQAUd6M0UAFFFFABRRRQAUUlFAC0Cik70ALRRRQAUUUUAFFFFABRmjvRQAUUUGgAooooAKKKTvQAtHeikoAXvRRRmgAooooAKMUUUAFFFFABRRSUALRSUtABRRRQAUUlFAC0UCigAooooAKKKKACiiigAoxRR2oAKKKKAA0UlLQAUd6SloAKKKKACkpaKADtSUtJQAtFHekoAWiikoAWkpe9FABRRSUALRRRQAUlLRmgAoFJRQAtFAooAO9FFFABRRSUALSUtFABRRRQAUUUUAGKO9BpKAFooooABSUtFABRSUUALRSUUAKaBR3pO9ABR3opaACik7UUAFFL3o70AFFFFABRSUtAB3oopKAClopKAFopKKAFopKKAFoopKAFoopKAHUUUUAJRRR3oABRRSUALSUtFABRRRQAUUUUAFFJS0AFFFFABRRRmgAoNHeigBKWiigAooooAKO9FFABRQKKACiiigAooooAMUYoooAKSlpKAFopKWgA70UUUAHejvRSUALRQaKACiiigAooxRQAUUGigAooooAKKMUGgAo70UUAGKKKKACkpaKACiiigAooooAKKKO9ABRiikoAWikpTQAUUUlAC0d6SloAKKKKACjvSUtABRRRQAUUlFAC0YpKKAFopKWgAoxRRQAd6KSloAKO9HejvQAUUlLQAUUlLQAUUUUAFFFFABRiikoAWikpaAEo70UtACd6WkpaACkoooAKWijvQAUUUYoAKKKKACiiigAoozRigAoopKAFopO9FAC0UUCgBKWiigApKWigBaKKKAEFFFFABRRRQAUlLRQAUUUUAHeiiigAxRRRQAUUUUAFFFFABRRQKAEpaO9FAB3oxRRQAUlKaDQAUUUUAHaiiigAooooAKKBRQAlLR3pKAFxRRRQAUUUGgBKWjvRQAUUUUAFFGaKAEpcUUUAGKKKKADvSUtFACUUoooAKKKKACiiigAooooAKKSl70AFJS0UAFFFFABSUtFACUUtGKADNJS0UAJS0UUAFFFAoAKKKKAEpaKKACijvRQAUnalooASloooAKKKKAEopaKAEpaKKACiiigAooooAKMUUUAFJS0dqACkpaKAEopaM0AJRS0UAFJRS0AJ3opaKAEo7UUtABRRRQAUUlLQAUd6KKACjNHaigApKWjvQAd6KKKAEopcUUAFGKTtS0AJS0UUALRRRQAlHeijFABRSUtABR3opKAFoxRRQAUUUd6ACjvSUtABRRRQAUUUd6ACiiigA70UUUAFHeikoAWiiigAooooAO9FFFABRRRQAUUUUAFFFGKADvRR3ooAKKKKACikpaACijNJQAtHejHNFABRRRQAUd6O9FAAKSlpKAFpKKKAFoo70UAFHeg0d6ACkpaKAEpaKKACikpcUAFFFFACUUtJQAtHeikoAWiikoAWijtQKADFAoo70AFFJS0AFJS0lABRS4ooAKKSlxQAUd6KKACjvRRQAlLSUtABQKKKAEpaSjvQAtFJS0AFHU0lLQAUCiigBKWjNJ3oAU0lHeigApaKSgA7UUUUAFFL3pKAFpKKWgBKWkooAXFFJRQAuKKSigBaKKKACijvSUALRRSUALRRRQAUlHeloAO9FJS0ALRRRQAlHeiigAo70UUABooooAKKKKACjvRRQAlLRRQAUUUd6ADFFHeigAopKWgAoooNAAKSlozQAneloooAKKKO1ABiiig0AHeijvRQAUYoooAKMUUUAFFFFABRRRQAUUneloADSUtFABSUtFABRSUtABRRRQAd6KKKAA0UCigAo70UUAFFFFABRRRQAUUlLQAUUlLQAUUUZoAKKO9HegApKKWgAooFFABSUUtABRiikoAWiiigAopKWgAopKKAFooooAKSlpKAFooooAKKKSgBaSjvSmgApKWigAooozQAUlLRQACiikoAWkpaKAEopaSgApe9JRQAtFJRQAUpopKAFFJS0lAC4oxQaSgBaKSlxQAlLRRQAlLRRQAlLSUvegAxSd6WjvQAUUUUAFFJS0AJS0UYoAWiiigBM0CiigAopKXvQAUlLQaACiiigAoopKAFopO9LQAUd6KSgBaO9FFABRRRQAd6KBRQAUUUUAFFFFABQaKKACiiigAzRR3ooAKKKO9ABSUtFABmikpaACiijvQAYooooAO9FFFABRSd6WgAFJS0UAFFGKDQAUUUlAC9qO9JS0AFFHeigAoooNABiiikoAKXvRR3oAKSlooABRiiigA70UUUAFFFFABRiiigAo70UUAHekpRR3oASiiloAKKKKACkpaKADtRRQaACiijFABRR2ooAKKKKADFFFAoAKKKKACiijvQAUYoooAKKDRQAUUUnegBaSiigApaKSgBaSiloAKSlpKACiiigBe9FHeigA70UUUAGKSilFABRR3ooAOhpKWkoAKKXvRQAUlLiigApKXvRQAUlLRQAtFFFACUYoooAKKKKACgUUUAHekpaKACiiigApKKKAFoxRiigAxRRRQAUUUUAFFFFABRRRQAUUYooAKM0UUAFFFFABRRRQAUUUZoAKSlooAKSlooAO9FFFAAaKKKACijvRQACikpaACjNFFAB3ooxRQAUUUUAFFFFABRRRQAUd6KM0AFFFBoAKSiloAKSlo70AFFFFABSd6WigAo70YooAKKSloAKKDRQAUUUUAFFFFAB3oNFFABQKKKACiiigBKWiigAo70UUAJS0YooAKKKKAAUYoooAKKKKACikpaACiiigAFJRS0ABopKWgBKKKWgBO9LRRQAUUlFABRS0UAHeiijvQAUd6KBQAlLRRQAUUUlAC0UUnegA70tFFABRSUtABRRRigAooxRQAtFFFACUUUUAHeiiigAooooAKKKKACiijvQAUUUUAFFFFAAKKKKACiiigAooooAKBRRQAUYoooAKKKKADFFFFAB3ooooABRiiigAFJS0UAFGKKKACiiigAooooAKKO9BoAMUUUUAFFFFACUveiigAooooAKKKKACiiigAooooAKKKKADvRRRQAUUneloAKKKKACiiigBO1LRjmigAooooAKKKKACiiigAooooAKO9FFABRRRQAZoxRRQAUUCigAooxSUALRRRQAUUUUAFFFFABRRRQAUlLRQAUUUUAHeiiigBO1FLRQAd6KKKACjFFFABSUtAoASloooAKSlooAKDRRQAUUUUAFHeiigAoopKAFooooAKO9FFABRRR3oAKKKKAFooooASiiigAooooAKKKKACiiigAoooxQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUdqKACiigUAFGKKKACiiigAoooFABRRiigAooooAKBRRQAd6KKDQAUd6MUYoAKBRRQAUUUUAFFFFABRRRQAUUUUAFFHejFABRRRmgAo70UUAFFFFABRiiigAooooAKKO9FABRRRQAd6KKKACiiigA70UUUAFFFFABRRRQAZooooAKKKKACkpaKACiiigAFFFFABRRR3oAKKKKACiiigAozRR3oAKKO9HagAoFFAoAKO9FFABRR3ooAO9JS0ZoAO9FFFABRRRQAZoxRRQACiigUABo70UZoAKKKKACijvRQAUUUUAHeijvRQAUUUYoAKKKKAFooooASiiigAooooAKKKKACiiigAooooAKKKKADvRRR3oAKMUUUAFFFFAAaKKKACiijvQAYooooAKKKKACiiigAooooAKKKKACiiigAooooAKDRRQAUUUUAFFFFABR3oooAKKKKACiiigAoo70UAFGKKKACiiigAooooAKO9FFABRRQKACjFFFABiiiigAooooAKKKKACiiigAo70UUAFFFAoAKKKKACijvRQAUUUUAFFFFABRRRQAUUUUAFGKO9FABRR3ooAKKO9FABRRRQAd6KKBQAd6KKKACiiigA70Yo7UCgAoo70CgAooooAKKBRQAUd6DRQAUUUd6ACiiigAooooAKKKKADvRRRQAUUUUAFHeiigA70UUYoAO9AoooAWiiigBKKKKACiijFABiiiigAooooADRR3ooAMUUCigAooooAKKKKACiiigAoozRQAUYoooAKKKKACiiigAozRRQAYooooABRRQKACiiigAooooAKKKKACiiigAooooAKKBRQAUYoooAKKKKACiiigAooooAO9FFFABRRRQAUUUUAFFFFABR3oooAKKKKACiiigAooooAO9AoooAKKKKACiiigAooooAKKMUUAFFFBoAKKKMUAFFJS0AFFFFABRRR3oAKKKKACiiigBKWiigA7UCiigAooooAKKKBQAUd6KKACiiigAooooADRRRQAZopKWgAoo70UAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRjiiigBaKKKAEooooAKKKKAAUUUd6ACijvRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFGaKO9ABRR3ooAKKKKACiiigAooooAKKO9FABRRRQAUUUUAFFFFABRRRQAdqKKKACiijvQAGiiigAooooAKKKKACiijNABRRRQAUUUCgAooooAKKKKACiiigAoxRRQAUUUUAGKKKKACiiigAooooAKDRRQAUUUUAFFFGaACiiigAxRRRQAUUUUAFFFFABRRRQAUdqKKACiiigAooooABRRRQAZooooAKKKKADtRR3ooABRiiigAoozQKACiigUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRR3ooAKKKKAFooooASiiigAooooAKKDRQAd6KKKACiiigAooxRQAUUUUAFFFHegAooooAKKKKACiiigAooooAKDRRQAUUUUAFFFHagAooooAKKO9FABRRRQAUUUUAFFFFABRRRQAYozRRQAUUd6KACiiigAooooAKKKKACiiigAooooAKKKKADvRRRQAUd6O1GKADNFFFABRRRQAUUUUAHeiiigAooooAKBRR3oAKKKKACijvRQAUZoooAKKKKACiiigA70UUYoAKKKKACiiigAooooAKKKKACijtQKACiiigAooooAKKKKACjvRRQAUd6KKACiiigAooozQAUUUUAFHeiigAoo70UAFGaKKACjNFHegAooooAKKKKAA0UUUAFFFFAC0UUUAJRRRQAUUUUAFFFFABRRRQAUUUUAFFFAoAKKKKACiiigAoNFFABRRRQAUUUUAFFFFABRRRQAUUUUAAooooAKKKKACjvRRQAUUUUAFAoooAMUUUUAFFFFABRRRQAUUUUAFFFFABRQKKACiiigAooooAKKKKACiiigAxRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQACiiigAoooNABRRRQAUUUUAFFFFAB3oFFFABRRRQAUUUUAFFFFABRRRQAUUUUAHaiiigAooooAKMUUUAAooxRQAUd6KKACg0UUAGaKKKACiiigAooooAKKKKACiiigApaSigAooooAKKKKACiiigAooooAKKKBQAtFFFACUUUUAFFFFABRiiigAooooAKO9FFABRRRQAUUUUAFFFFABRRQaADNFFFABRRRmgAoFFFABRiiigAooooADRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUCgAoooxQAUUUdqACjvRRQAUUUUAFFFFABRRRQAUUUUAFFFFAB2ooooAKKKKACiiigAooooAKKKKACijPNFABR3oxRQAd6KKKAAUUUUAFAoooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACjvRRigAooooAKKKKACiiigAooooAKKKKADFFFFABRR3ooAKM0UUAFHeiigAooooAKKKKACiiigAooooAWiiigBKKKBQAUUGigAooooABRRRQAUUUUAFFFFABRRRQACiiigAooFFABRRRQAUd6KKADvRRRQAGiiigAo70UUAFFGKKACiiigAFFFFABRR2ooAKKKKACiiigAooFFABRRR3oAKMUUGgAooooAKKKKACiiigAxRRRQAUUUUAFFFFABRRRQAUUdqKAAUUUd6ACiigUAHeiiigA70UUUAFFFFABRRR+FABRRRQAUYoooAKKKKACiiigAoxRRQAUUUUAFFFHegAooooAKKKKACiiigAooo70AFFFGKACiiigAooooAO9GKKKACikpRQAd6KKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKAAUUUUALRRRQAlFFFABiigUUAFAoooAKKKKACiiigAooooAKKKSgBaKKKACiiigAoooxQAUUUUAFFBooAKKMUY5oAKKKKACiiigAooooAKKKKADFFFFABRRRQAGiiigAoxRRQAd6KKKACiiigAooooAKKKKACiiigAooo70AFFFFAB3ooooAKKKKADvRijFFABiiiigAooooAKKKKACiiigAoo70UAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAB2ooooAKKKKACiiigAooooAKKKKACijFFABRRRQAUUUUAFFFFABRRRQAUd6O9FABRQKKACiiigAooooAKKDR3oAKKKKACijvRQAUUd6KACiiigA70UUUAFFFFAC0UUUAJ3ooozQAUUd6KACgUUUAGaO9FHegAooo70AFFFFABRRRQAZooooAKKKKACijvRQAUUUUAFFFFAB3ooooAKKKO9ABRRR3oAKKO9AoAKKKKACiiigAooooAKKKKACiijvQAUUUUAFFFFABRRRQAUUUUAFFFFAAKKKKACijvRQAUUUUAFHeiigAooozQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUd6KKADvRRRQAUUd6KADvRRRQAUUUUAFFFFABRRRQAUUUUAFFFHegAooo70AFFFFABRRR3oAKKKKAAUUUUAFHeig0AFFFFABRRRQAUd6KKACijvRQAUUd6KACiiigAooooAKKKBQAd6KKBQAtFFFACUUUYoAKKKM0AHeiigUAFBoooAKKKKACiiigAoxRRQAUUUUAHQ0UUUAFFFFABRRRQAUUUUABooooAKKKKACiiigAoo70UAFFFFABRRR3oAKKO9FABQKKKACiigUAFFHeigAFFFFAB3ooooAKKM0UAHeijvRQAUUUUAFFFFABRRRQAYoFFFABRRRQAUUUUAFJS96KACiiigAooooAKKKKADvR3oooAKKKKACiiigAooooAKKKKACjvRQaACiiigAooooAKBRRQAUUUUAFFFFAAKKKKACijvRQAUUUYoAKM0UUAFFFFABRRRQAd6KMUUAFFFFABRRRQAUUUUAFFHeigAooooAKKKO9ABRRRQAUUUUAFFFFABRRmigBaKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA//9k=";
+document.getElementById('logoTop').src = LOGO_B64;
+document.getElementById('logoDoc').src = LOGO_B64;
+
+const BLOQUE = "BL61"; // Código de bloque/planta — fijo para esta implementación
+let currentFolio = null;
+let currentNum = null;
+let docState = "none"; // none | borrador | emitida | anulada
+
+function pad(n,l){ return String(n).padStart(l,'0'); }
+
+// --- Código de equipo/tablet (para operación local sin servidor) ---
+const DEVICE_CODE_KEY = 'sgi:device_code';
+function getDeviceCode(){
+  let code = null;
+  try{ code = localStorage.getItem(DEVICE_CODE_KEY); }catch(e){}
+  if(!code){
+    code = (prompt('Configuración inicial de este equipo.\n\nIngresa el código de esta tablet/equipo (ej. TAB-01, TAB-02). Este código se usará una sola vez y se guardará en este dispositivo para que sus números de guía nunca choquen con los de otro equipo.', 'TAB-01') || 'TAB-01').trim().toUpperCase().replace(/[^A-Z0-9-]/g,'');
+    if(!code) code = 'TAB-01';
+    try{ localStorage.setItem(DEVICE_CODE_KEY, code); }catch(e){}
+  }
+  return code;
+}
+let DEVICE_CODE = getDeviceCode();
+document.getElementById('storageNote').textContent = 'Equipo: '+DEVICE_CODE+' (numeración local — lista para migrar a servidor)';
+function cambiarDeviceCode(){
+  if(docState==='borrador'){ alert('Guarda o anula la guía en curso antes de cambiar el código de equipo.'); return; }
+  const nuevo = (prompt('Nuevo código de equipo/tablet:', DEVICE_CODE) || '').trim().toUpperCase().replace(/[^A-Z0-9-]/g,'');
+  if(!nuevo) return;
+  DEVICE_CODE = nuevo;
+  try{ localStorage.setItem(DEVICE_CODE_KEY, DEVICE_CODE); }catch(e){}
+  document.getElementById('storageNote').textContent = 'Equipo: '+DEVICE_CODE+' (numeración local — lista para migrar a servidor)';
+}
+
+function setStatus(s){
+  docState = s;
+  const pill = document.getElementById('statusPill');
+  pill.className = 'status-pill status-' + s;
+  pill.textContent = s==='none' ? 'SIN INICIAR' : s==='borrador' ? 'BORRADOR (SIN GUARDAR)' : s==='emitida' ? 'EMITIDA' : 'ANULADA';
+  const editable = (s==='borrador');
+  const siempreEditables = ['f_vol_contador','f_varillado_total','f_variacion','f_ruta_alterna_check','f_ruta_alterna_detalle'];
+  document.querySelectorAll('.doc input, .doc select, .doc textarea').forEach(el=>{
+    if(siempreEditables.includes(el.id)) return;
+    el.disabled = !editable;
+  });
+  document.getElementById('btnNueva').disabled = (s==='borrador');
+  document.getElementById('btnGuardar').disabled = !(s==='borrador');
+  document.getElementById('btnAnular').disabled = !(s==='borrador');
+}
+
+function buildRows(){
+  const mBody = document.getElementById('sellosManholeBody');
+  for(let i=1;i<=4;i++){
+    mBody.innerHTML += `<tr><td>${i}</td><td><input type="text" id="sm_${i}"></td></tr>`;
+  }
+  const vBody = document.getElementById('sellosValvulaBody');
+  for(let i=1;i<=8;i++){
+    vBody.innerHTML += `<tr><td>${i}</td><td><input type="text" id="sv_${i}"></td></tr>`;
+  }
+  buildVolumenRows(null);
+}
+buildRows();
+
+// --- Interpolación lineal sobre la tabla de calibración (cm -> galones) ---
+function galonesDesdeAltura(placa, compIndex, cm){
+  const cal = calibracionTanqueros[placa];
+  if(!cal || !cal.compartimentos[compIndex-1] || isNaN(cm)) return null;
+  const tabla = cal.compartimentos[compIndex-1];
+  if(cm <= tabla[0][0]) return tabla[0][1];
+  const last = tabla[tabla.length-1];
+  if(cm >= last[0]) return last[1];
+  for(let i=0;i<tabla.length-1;i++){
+    const [c1,g1] = tabla[i], [c2,g2] = tabla[i+1];
+    if(cm>=c1 && cm<=c2){
+      const frac = (c2===c1) ? 0 : (cm-c1)/(c2-c1);
+      const gal = g1 + frac*(g2-g1);
+      return gal;
+    }
+  }
+  return null;
+}
+function calcularPorAltura(i){
+  const placa = document.getElementById('f_placa').value.trim().toUpperCase();
+  const cmVal = parseFloat(document.getElementById('altura_'+i).value);
+  const galones = galonesDesdeAltura(placa, i, cmVal);
+  const vmInput = document.getElementById('vm_'+i);
+  if(vmInput) vmInput.value = (galones!==null && !isNaN(cmVal)) ? galones.toFixed(2) : '';
+  recalcular();
+}
+function buildVolumenRows(placa){
+  const volBody = document.getElementById('volumenBody');
+  const nota = document.getElementById('calibNota');
+  const cal = placa ? calibracionTanqueros[(placa||'').toUpperCase()] : null;
+  const nComp = cal ? cal.compartimentos.length : 0;
+  let html = '';
+  for(let i=1;i<=4;i++){
+    if(cal && i<=nComp){
+      html += `<tr><td>${i}</td>
+        <td><input type="number" step="0.1" id="altura_${i}" placeholder="Ej. 45.5" oninput="calcularPorAltura(${i})"></td>
+        <td><input type="text" id="vm_${i}" readonly></td></tr>`;
+    } else if(cal && i>nComp){
+      html += `<tr><td>${i}</td><td colspan="2" style="color:#aaa;font-style:italic;text-align:center;">No aplica — esta unidad tiene ${nComp} compartimento(s)</td></tr>`;
+    } else {
+      html += `<tr><td>${i}</td><td style="color:#ccc;text-align:center;">— sin tabla —</td><td><input type="number" step="0.01" id="vm_${i}" oninput="recalcular()"></td></tr>`;
+    }
+  }
+  volBody.innerHTML = html;
+  if(nota){
+    nota.textContent = cal
+      ? 'Tabla de calibración cargada para '+placa.toUpperCase()+' ('+nComp+' compartimentos) — ingresa la altura varillada en cm (admite decimales/mm) y el litraje se calcula por interpolación de la tabla oficial.'
+      : (placa ? 'Sin tabla de calibración cargada para '+placa.toUpperCase()+' — ingreso manual de galones.' : '');
+  }
+  recalcular();
+}
+
+['f_cont_desde','f_cont_hasta','f_vol_excel','f_vol_aprobado','f_tolerancia'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', recalcular);
+});
+
+function recalcular(){
+  const desde = parseFloat(document.getElementById('f_cont_desde').value)||0;
+  const hasta = parseFloat(document.getElementById('f_cont_hasta').value)||0;
+  const volContador = hasta - desde;
+  document.getElementById('f_vol_contador').value = (hasta>0||desde>0) ? volContador.toFixed(2)+' GL' : '';
+
+  let sumaVarillado = 0;
+  for(let i=1;i<=4;i++){
+    const el = document.getElementById('vm_'+i);
+    const v = el ? (parseFloat(el.value)||0) : 0;
+    sumaVarillado += v;
+    const lbl = document.getElementById('volLabel'+i);
+    if(lbl) lbl.textContent = v.toFixed(v%1===0?0:2) + ' GL';
+  }
+  document.getElementById('f_varillado_total').value = sumaVarillado.toFixed(2)+' GL';
+
+  const reportadoExcel = parseFloat(document.getElementById('f_vol_excel').value)||0;
+  const tol = 0.5; // Tolerancia fija ±0.5% — no configurable por el usuario
+
+  let refBase = reportadoExcel>0 ? reportadoExcel : volContador;
+  let diff = sumaVarillado - refBase;
+  let pct = refBase!==0 ? (diff/refBase*100) : 0;
+
+  if(refBase===0 && sumaVarillado===0){
+    document.getElementById('f_variacion').value = '';
+    document.getElementById('badgeVariacion').textContent='—';
+    document.getElementById('badgeVariacion').className='badge';
+  } else {
+    document.getElementById('f_variacion').value = diff.toFixed(2)+' GL  ('+pct.toFixed(2)+'%)';
+    const badge = document.getElementById('badgeVariacion');
+    if(Math.abs(pct) <= tol){ badge.textContent='✓ CONFORME'; badge.className='badge ok'; }
+    else { badge.textContent='⚠ VERIFICAR — fuera de tolerancia'; badge.className='badge warn'; }
+  }
+}
+
+// --- Firmas (canvas) ---
+const sigIds = ['sig_liberado','sig_supervisor','sig_ayudante','sig_conductor'];
+const sigCtx = {};
+function initSig(id){
+  try{
+    const c = document.getElementById(id);
+    if(!c) return;
+    const ratio = window.devicePixelRatio||1;
+    const w = c.offsetWidth||300, h = c.offsetHeight||70;
+    c.width = w*ratio; c.height = h*ratio;
+    const ctx = c.getContext && c.getContext('2d');
+    if(!ctx) return;
+    ctx.scale(ratio,ratio);
+    ctx.lineWidth=2; ctx.lineCap='round'; ctx.strokeStyle='#1a1a1a';
+    sigCtx[id]=ctx;
+    let drawing=false, last=null;
+    function pos(e){ const r=c.getBoundingClientRect(); const p=e.touches?e.touches[0]:e; return {x:p.clientX-r.left,y:p.clientY-r.top}; }
+  function start(e){ if(c.disabled) return; drawing=true; last=pos(e); e.preventDefault(); }
+  function move(e){ if(!drawing||c.disabled) return; const p=pos(e); ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(p.x,p.y); ctx.stroke(); last=p; e.preventDefault(); }
+  function end(){ drawing=false; }
+  c.addEventListener('mousedown',start); c.addEventListener('mousemove',move); window.addEventListener('mouseup',end);
+  c.addEventListener('touchstart',start,{passive:false}); c.addEventListener('touchmove',move,{passive:false}); c.addEventListener('touchend',end);
+  }catch(err){ console.warn('No se pudo inicializar la firma', id, err); }
+}
+sigIds.forEach(initSig);
+function clearSig(id){
+  const c=document.getElementById(id); const ctx=sigCtx[id];
+  if(c && ctx) ctx.clearRect(0,0,c.width,c.height);
+}
+
+// --- Almacenamiento persistente compartido (numeración) ---
+const NUMERO_INICIAL = 199; // Primera guía a emitir (las anteriores ya fueron hechas)
+let memoryCounter = 0;
+let memoryRecords = {};
+let storageDisponible = true;
+
+async function getCounter(){
+  try{
+    const raw = localStorage.getItem('sgi:counter:'+BLOQUE+':'+DEVICE_CODE);
+    const val = Math.max(raw ? parseInt(raw,10) || 0 : 0, NUMERO_INICIAL - 1);
+    memoryCounter = val;
+    return val;
+  }catch(e){
+    storageDisponible = false;
+    return Math.max(memoryCounter, NUMERO_INICIAL - 1);
+  }
+}
+async function setCounter(v){
+  memoryCounter = v;
+  try{ localStorage.setItem('sgi:counter:'+BLOQUE+':'+DEVICE_CODE, String(v)); }
+  catch(e){ storageDisponible = false; }
+}
+async function saveRecord(folio, data){
+  memoryRecords[folio] = data;
+  try{ localStorage.setItem('sgi:record:'+folio, JSON.stringify(data)); }
+  catch(e){ storageDisponible = false; }
+}
+
+function clearForm(){
+  document.querySelectorAll('.doc input[type=text], .doc input[type=number], .doc textarea').forEach(el=>el.value='');
+  document.getElementById('f_estado').value='Pendiente';
+  document.getElementById('f_producto').value='';
+  document.getElementById('f_conductor').value='';
+  document.getElementById('f_placa').value='';
+  document.getElementById('f_capacidad_matriz').value='';
+  document.getElementById('f_empresa_placa').value='';
+  buildVolumenRows(null);
+  document.getElementById('statusConductor').innerHTML='';
+  document.getElementById('statusPlaca').innerHTML='';
+  document.getElementById('f_variacion').value='';
+  document.getElementById('f_vol_contador').value='';
+  document.getElementById('f_varillado_total').value='';
+  document.getElementById('badgeVariacion').textContent='—';
+  document.getElementById('badgeVariacion').className='badge';
+  sigIds.forEach(id=>clearSig(id));
+  document.getElementById('f_ruta_alterna_check').checked = false;
+  document.getElementById('rutaAlternaBox').style.display = 'none';
+  document.getElementById('rutaAlternaNota').textContent = '';
+  recalcular();
+}
+
+async function nuevaGuia(){
+  if(docState==='borrador'){
+    if(!confirm('Ya hay una guía en borrador sin guardar. ¿Deseas descartarla y comenzar una nueva? El número asignado no se reutilizará.')) return;
+  }
+  const counter = await getCounter();
+  const newNum = counter+1;
+  await setCounter(newNum);
+  currentNum = newNum;
+  currentFolio = BLOQUE+'-'+DEVICE_CODE+'-'+pad(newNum,6);
+
+  clearForm();
+  const today = new Date();
+  document.getElementById('f_fecha').value = today.toISOString().slice(0,10);
+  document.getElementById('f_hora').value = today.toTimeString().slice(0,5);
+  document.getElementById('folioDisplay').textContent = currentFolio;
+  document.getElementById('fechaDisplay').textContent = today.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' · ' + today.toTimeString().slice(0,5);
+
+  setStatus('borrador');
+  const note = document.getElementById('storageNote');
+  note.textContent = storageDisponible
+    ? 'Equipo: '+DEVICE_CODE+' · numeración local de esta tablet'
+    : '⚠ No se pudo guardar el contador en este navegador (modo privado / sin almacenamiento). El número mostrado podría repetirse al recargar.';
+}
+
+function collectData(){
+  const sellosM=[], sellosV=[], vols=[], alturas=[];
+  for(let i=1;i<=4;i++) sellosM.push(document.getElementById('sm_'+i).value);
+  for(let i=1;i<=8;i++) sellosV.push(document.getElementById('sv_'+i).value);
+  for(let i=1;i<=4;i++){
+    const vEl = document.getElementById('vm_'+i);
+    const aEl = document.getElementById('altura_'+i);
+    vols.push(vEl ? vEl.value : '');
+    alturas.push(aEl ? aEl.value : '');
+  }
+  return {
+    folio: currentFolio, bloque: BLOQUE, numero: currentNum,
+    fecha: document.getElementById('f_fecha').value, hora: document.getElementById('f_hora').value,
+    partida: document.getElementById('f_partida').value, llegada: document.getElementById('f_llegada').value,
+    rutaAlterna: document.getElementById('f_ruta_alterna_check').checked, rutaAlternaDetalle: document.getElementById('f_ruta_alterna_detalle').value,
+    producto: document.getElementById('f_producto').value, temperatura: document.getElementById('f_temp').value,
+    conductor: document.getElementById('f_conductor').value, conductorId: document.getElementById('f_conductor_id').value,
+    empresaConductor: document.getElementById('f_empresa_conductor').value,
+    ayudante: document.getElementById('f_ayudante').value, gv: document.getElementById('f_gv').value,
+    placa: document.getElementById('f_placa').value.toUpperCase(), orden: document.getElementById('f_orden').value,
+    empresaUnidad: document.getElementById('f_empresa_placa').value,
+    volAprobado: document.getElementById('f_vol_aprobado').value,
+    contDesde: document.getElementById('f_cont_desde').value, contHasta: document.getElementById('f_cont_hasta').value,
+    volContador: document.getElementById('f_vol_contador').value,
+    sellosManhole: sellosM, sellosValvula: sellosV, volumenManhole: vols, alturasVarilla: alturas,
+    varilladoTotal: document.getElementById('f_varillado_total').value,
+    volExcel: document.getElementById('f_vol_excel').value,
+    variacion: document.getElementById('f_variacion').value,
+    tolerancia: document.getElementById('f_tolerancia').value,
+    observaciones: document.getElementById('f_obs').value,
+    estado: document.getElementById('f_estado').value, logistico: document.getElementById('f_logistico').value,
+    nombreLiberado: document.getElementById('fn_liberado').value, nombreSupervisor: document.getElementById('fn_supervisor').value,
+    nombreAyudante2: document.getElementById('fn_ayudante2').value, nombreConductor2: document.getElementById('fn_conductor2').value,
+    validacionConductor: (document.getElementById('statusConductor').textContent||'').trim(),
+    validacionUnidad: (document.getElementById('statusPlaca').textContent||'').trim(),
+    alertaCumplimiento: document.getElementById('alertaCumplimiento').style.display==='block',
+    emitidoEn: new Date().toISOString()
+  };
+}
+
+async function guardarGuia(){
+  if(!document.getElementById('f_conductor').value || !document.getElementById('f_placa').value || !document.getElementById('f_partida').value || !document.getElementById('f_llegada').value){
+    alert('Completa al menos Conductor, Placa, Punto de partida y Punto de llegada antes de emitir la guía.');
+    return;
+  }
+  const data = collectData();
+  await saveRecord(currentFolio, data);
+  await appendConsolidado(data);
+  setStatus('emitida');
+  actualizarNotaConsolidado();
+  alert('Guía '+currentFolio+' guardada y emitida. El número queda bloqueado y ya fue agregada al Consolidado con su sello de auditoría.');
+}
+
+async function anularGuia(){
+  if(!confirm('¿Anular la guía '+currentFolio+'? El número no podrá reutilizarse.')) return;
+  const data = collectData(); data.estado='Anulada';
+  await saveRecord(currentFolio, data);
+  await appendConsolidado(data);
+  setStatus('anulada');
+  actualizarNotaConsolidado();
+}
+
+// --- Consolidado con cadena de auditoría (hash SHA-256 enlazado, estilo blockchain) ---
+const CONSOLIDADO_KEY = 'sgi:consolidado:'+BLOQUE;
+function getConsolidado(){
+  try{
+    const raw = localStorage.getItem(CONSOLIDADO_KEY);
+    return raw ? JSON.parse(raw) : [];
+  }catch(e){ return []; }
+}
+async function sha256Hex(mensaje){
+  const buf = new TextEncoder().encode(mensaje);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hashBuffer)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function appendConsolidado(record){
+  try{
+    const arr = getConsolidado();
+    const hashPrevio = arr.length ? arr[arr.length-1].hashActual : 'GENESIS';
+    const contenido = JSON.stringify(record);
+    const hashActual = await sha256Hex(contenido + hashPrevio);
+    const registro = Object.assign({}, record, {hashPrevio, hashActual});
+    arr.push(registro);
+    localStorage.setItem(CONSOLIDADO_KEY, JSON.stringify(arr));
+  }catch(e){
+    alert('⚠ No se pudo guardar esta guía en el Consolidado de este equipo (almacenamiento no disponible o SHA-256 no soportado — requiere conexión https). Exporta el Excel individual de esta guía como respaldo.');
+  }
+}
+// --- Ruta Alterna: permite documentar un desvío de ruta sin alterar el registro original ---
+function toggleRutaAlterna(){
+  const check = document.getElementById('f_ruta_alterna_check').checked;
+  document.getElementById('rutaAlternaBox').style.display = check ? 'block' : 'none';
+}
+async function registrarCambioRuta(){
+  if(!currentFolio){ alert('No hay una guía activa para registrar un cambio de ruta.'); return; }
+  const check = document.getElementById('f_ruta_alterna_check').checked;
+  const detalle = document.getElementById('f_ruta_alterna_detalle').value.trim();
+  if(!check || !detalle){
+    alert('Marca la casilla y describe el detalle de la ruta alterna antes de registrar el cambio.');
+    return;
+  }
+  const ahora = new Date();
+  const registroCambio = {
+    folio: currentFolio,
+    tipoRegistro: 'CAMBIO_DE_RUTA',
+    bloque: BLOQUE,
+    equipo: DEVICE_CODE,
+    rutaPlanificada: (document.getElementById('f_partida').value||'')+' → '+(document.getElementById('f_llegada').value||''),
+    rutaAlternaDetalle: detalle,
+    registradoEn: ahora.toISOString(),
+    estado: 'Cambio de ruta registrado'
+  };
+  await appendConsolidado(registroCambio);
+  const nota = document.getElementById('rutaAlternaNota');
+  nota.textContent = 'Registrado el '+ahora.toLocaleString('es-EC')+' por el equipo '+DEVICE_CODE+'. Este cambio quedó enlazado en la cadena de auditoría del Consolidado, sin modificar la ruta planificada original.';
+  actualizarNotaConsolidado();
+  alert('Cambio de ruta registrado y agregado al historial de auditoría del Consolidado. La ruta planificada original NO se modifica — este es un registro adicional de trazabilidad.');
+}
+
+async function verificarConsolidado(){
+  const arr = getConsolidado();
+  if(arr.length===0){ alert('No hay guías en el Consolidado de este equipo para verificar todavía.'); return; }
+  let hashEsperado = 'GENESIS';
+  for(let i=0;i<arr.length;i++){
+    const r = arr[i];
+    const {hashPrevio, hashActual, ...contenido} = r;
+    const recalculado = await sha256Hex(JSON.stringify(contenido) + hashEsperado);
+    if(hashPrevio !== hashEsperado || hashActual !== recalculado){
+      alert('⚠ CADENA DE AUDITORÍA ROTA en el registro N° '+(i+1)+' (folio '+r.folio+').\n\nEsto significa que ese registro (o uno anterior) fue modificado, borrado o alterado fuera de la aplicación después de haberse guardado. Se recomienda investigar con el equipo antes de confiar en este Consolidado.');
+      return;
+    }
+    hashEsperado = hashActual;
+  }
+  alert('✓ Integridad verificada.\n\n'+arr.length+' guía(s) revisada(s) en el Consolidado de este equipo ('+DEVICE_CODE+').\nLa cadena de auditoría está completa: ningún registro fue alterado ni eliminado desde que se guardó.');
+}
+
+function actualizarNotaConsolidado(){
+  const n = getConsolidado().length;
+  const el = document.getElementById('consolidadoNote');
+  if(el) el.textContent = 'Consolidado de este equipo ('+DEVICE_CODE+'): '+n+' guía(s) emitida(s)/anulada(s) guardadas, cada una con sello de auditoría enlazado (hash SHA-256). Usa "Verificar Integridad" para confirmar que el historial no ha sido alterado.';
+}
+function exportConsolidadoExcel(){
+  const arr = getConsolidado();
+  if(arr.length===0){
+    alert('Aún no hay ninguna guía guardada en el Consolidado de este equipo. Guarda y emite al menos una guía primero.');
+    return;
+  }
+  const headers = ['Tipo de Registro','Folio','Bloque','Fecha','Hora','Punto Partida','Punto Llegada','¿Ruta Alterna?','Detalle Ruta Alterna','Producto','Temperatura (°C)',
+    'Conductor','Cédula','Empresa Conductor','Ayudante','N° G.V.','Placa','Empresa Unidad','N° Orden Despacho',
+    'Vol. Aprobado (GL)','Contador Desde','Contador Hasta','Vol. Contador (GL)',
+    'Sello Manhole 1','Sello Manhole 2','Sello Manhole 3','Sello Manhole 4',
+    'Sello Válvula 1','Sello Válvula 2','Sello Válvula 3','Sello Válvula 4','Sello Válvula 5','Sello Válvula 6','Sello Válvula 7','Sello Válvula 8',
+    'Vol. Varillado Total (GL)',
+    'Vol. Reportado Excel (GL)','Variación','Tolerancia (%)','Observaciones','Estado','Logístico Responsable',
+    'Liberado Por','Supervisor','Ayudante (firma)','Conductor (firma)','Validación Conductor','Validación Unidad',
+    'Alerta Cumplimiento','Emitido (timestamp)','Hash Anterior (auditoría)','Hash Actual (auditoría)'];
+  const rows = [headers];
+  arr.forEach(d=>{
+    if(d.tipoRegistro==='CAMBIO_DE_RUTA'){
+      const fila = Array(headers.length).fill('');
+      fila[0]='CAMBIO DE RUTA'; fila[1]=d.folio; fila[2]=d.bloque;
+      fila[5]=d.rutaPlanificada||''; fila[7]='SÍ'; fila[8]=d.rutaAlternaDetalle||'';
+      fila[headers.length-3]=d.registradoEn||''; fila[headers.length-2]=d.hashPrevio||''; fila[headers.length-1]=d.hashActual||'';
+      rows.push(fila);
+      return;
+    }
+    const sm = d.sellosManhole||[], sv = d.sellosValvula||[];
+    rows.push(['GUÍA',d.folio,d.bloque,d.fecha,d.hora,d.partida,d.llegada,d.rutaAlterna?'SÍ':'NO',d.rutaAlternaDetalle||'',d.producto,d.temperatura,
+      d.conductor,d.conductorId,d.empresaConductor,d.ayudante,d.gv,d.placa,d.empresaUnidad,d.orden,
+      d.volAprobado,d.contDesde,d.contHasta,d.volContador,
+      sm[0]||'',sm[1]||'',sm[2]||'',sm[3]||'',
+      sv[0]||'',sv[1]||'',sv[2]||'',sv[3]||'',sv[4]||'',sv[5]||'',sv[6]||'',sv[7]||'',
+      d.varilladoTotal,
+      d.volExcel,d.variacion,d.tolerancia,d.observaciones,d.estado,d.logistico,
+      d.nombreLiberado,d.nombreSupervisor,d.nombreAyudante2,d.nombreConductor2,d.validacionConductor,d.validacionUnidad,
+      d.alertaCumplimiento?'SÍ':'NO',d.emitidoEn,d.hashPrevio||'',d.hashActual||'']);
+  });
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = headers.map(()=>({wch:22}));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Consolidado');
+  XLSX.writeFile(wb, 'Consolidado_Guias_'+BLOQUE+'_'+DEVICE_CODE+'.xlsx');
+}
+
+// --- Exportar / Importar JSON de la guía actual (respaldo y traspaso entre equipos) ---
+function exportarJSON(){
+  const data = collectData();
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Guia_'+(currentFolio||'borrador')+'.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function importarJSON(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    let d;
+    try{ d = JSON.parse(e.target.result); }
+    catch(err){ alert('El archivo no es un JSON válido de una guía.'); return; }
+    if(!d.folio){ alert('El archivo no contiene una guía reconocible (falta el folio).'); return; }
+    if(docState==='borrador'){
+      if(!confirm('Hay una guía en borrador sin guardar. ¿Descartarla e importar el archivo JSON?')) { event.target.value=''; return; }
+    }
+    // Restaurar folio y fecha/hora tal como estaban al exportar
+    currentFolio = d.folio; currentNum = d.numero;
+    document.getElementById('folioDisplay').textContent = currentFolio;
+    document.getElementById('fechaDisplay').textContent = (d.fecha||'')+' · '+(d.hora||'');
+
+    document.getElementById('f_fecha').value = d.fecha||'';
+    document.getElementById('f_hora').value = d.hora||'';
+    document.getElementById('f_partida').value = d.partida||'';
+    document.getElementById('f_llegada').value = d.llegada||'';
+    document.getElementById('f_ruta_alterna_check').checked = !!d.rutaAlterna;
+    document.getElementById('f_ruta_alterna_detalle').value = d.rutaAlternaDetalle||'';
+    document.getElementById('rutaAlternaBox').style.display = d.rutaAlterna ? 'block' : 'none';
+    document.getElementById('f_producto').value = d.producto||'';
+    document.getElementById('f_temp').value = d.temperatura||'';
+    document.getElementById('f_conductor').value = d.conductor||'';
+    document.getElementById('f_ayudante').value = d.ayudante||'';
+    document.getElementById('f_gv').value = d.gv||'';
+    document.getElementById('f_orden').value = d.orden||'';
+    document.getElementById('f_vol_aprobado').value = d.volAprobado||'';
+    document.getElementById('f_cont_desde').value = d.contDesde||'';
+    document.getElementById('f_cont_hasta').value = d.contHasta||'';
+    document.getElementById('f_vol_excel').value = d.volExcel||'';
+    document.getElementById('f_obs').value = d.observaciones||'';
+    document.getElementById('f_estado').value = d.estado||'Pendiente';
+    document.getElementById('f_logistico').value = d.logistico||'';
+    document.getElementById('fn_liberado').value = d.nombreLiberado||'';
+    document.getElementById('fn_supervisor').value = d.nombreSupervisor||'';
+    document.getElementById('fn_ayudante2').value = d.nombreAyudante2||'';
+    document.getElementById('fn_conductor2').value = d.nombreConductor2||'';
+    if(Array.isArray(d.sellosManhole)) d.sellosManhole.forEach((v,i)=>{ const el=document.getElementById('sm_'+(i+1)); if(el) el.value=v||''; });
+    if(Array.isArray(d.sellosValvula)) d.sellosValvula.forEach((v,i)=>{ const el=document.getElementById('sv_'+(i+1)); if(el) el.value=v||''; });
+
+    setStatus('borrador');
+    checkConductor();
+    checkPlaca();
+    document.getElementById('f_empresa_conductor').value = d.empresaConductor||'';
+    document.getElementById('f_empresa_placa').value = d.empresaUnidad||'';
+
+    // Restaurar alturas/cantidades por compartimento (después de que checkPlaca reconstruyó la tabla)
+    if(Array.isArray(d.alturasVarilla)){
+      d.alturasVarilla.forEach((v,i)=>{
+        const el = document.getElementById('altura_'+(i+1));
+        if(el && v) el.value = v;
+      });
+    }
+    if(Array.isArray(d.volumenManhole)){
+      d.volumenManhole.forEach((v,i)=>{
+        const el = document.getElementById('vm_'+(i+1));
+        if(el && v && !document.getElementById('altura_'+(i+1))) el.value = v;
+      });
+    }
+    recalcular();
+    sigIds.forEach(id=>clearSig(id)); // las firmas no se restauran desde JSON
+
+    alert('Guía '+currentFolio+' importada como borrador. Revisa los datos y presiona "Guardar y Emitir" para registrarla en este equipo.');
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+
+function exportExcel(){
+  const d = collectData();
+  const rows = [
+    ['GUÍA DE REMISIÓN','TECKNOLOGISTIC'],
+    ['N° de Guía', d.folio], ['Fecha', d.fecha], ['Hora inicio', d.hora],
+    ['Punto de partida', d.partida], ['Punto de llegada', d.llegada],
+    ['¿Ruta diferente a la establecida?', d.rutaAlterna?'SÍ':'NO'], ['Detalle ruta alterna / motivo', d.rutaAlternaDetalle||''],
+    ['Producto', d.producto], ['Temperatura (°C)', d.temperatura],
+    ['Conductor', d.conductor], ['Cédula conductor', d.conductorId], ['Empresa (conductor)', d.empresaConductor], ['Ayudante', d.ayudante],
+    ['N° G.V.', d.gv], ['Placa', d.placa], ['Empresa (unidad)', d.empresaUnidad], ['N° Orden despacho', d.orden],
+    ['Volumen aprobado (GL)', d.volAprobado], ['Contador desde', d.contDesde], ['Contador hasta', d.contHasta],
+    ['Volumen despachado (contador)', d.volContador], [],
+    ['SELLOS — COMPARTIMENTO (MANHOLE)'], ...d.sellosManhole.map((s,i)=>['Compartimento '+(i+1), s||'—']), [],
+    ['SELLOS — VÁLVULA DE DESCARGA'], ...d.sellosValvula.map((s,i)=>['Válvula '+(i+1), s||'—']), [],
+    ['VOLUMEN VARILLADO POR COMPARTIMENTO'],
+    ...d.volumenManhole.map((s,i)=>['Manhole '+(i+1)+' — Altura (cm) / Cantidad (GL)', (d.alturasVarilla[i]||'—')+' cm / '+(s||'—')+' GL']), [],
+    ['Volumen varillado total (GL)', d.varilladoTotal], ['Volumen reportado Excel/sistema (GL)', d.volExcel],
+    ['Variación', d.variacion], ['Tolerancia (%)', d.tolerancia], [],
+    ['Observaciones', d.observaciones], ['Estado', d.estado], ['Logístico responsable', d.logistico], [],
+    ['Liberado por', d.nombreLiberado], ['Supervisor', d.nombreSupervisor], ['Ayudante (firma)', d.nombreAyudante2], ['Conductor (firma)', d.nombreConductor2], [],
+    ['VALIDACIÓN — MATRIZ DE CONDUCTORES Y TANQUEROS'],
+    ['Alerta de cumplimiento', d.alertaCumplimiento ? 'SÍ — verificar antes de despachar' : 'No'],
+    ['Estado documental conductor', d.validacionConductor || 'Sin datos'],
+    ['Estado documental unidad', d.validacionUnidad || 'Sin datos'], [],
+    ['Emitido (timestamp)', d.emitidoEn]
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols'] = [{wch:32},{wch:28}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Guia_Remision');
+  XLSX.writeFile(wb, 'Guia_Remision_'+d.folio+'.xlsx');
+}
+
+function exportPdf(){
+  const el = document.getElementById('documento');
+  el.classList.add('printing');
+  const opt = {
+    margin: 0.3,
+    filename: 'Guia_Remision_'+currentFolio+'.pdf',
+    image: { type:'jpeg', quality:0.95 },
+    html2canvas: { scale:1.5, useCORS:true, windowWidth:900, width: el.scrollWidth>900?el.scrollWidth:900, scrollX:0, scrollY:0 },
+    jsPDF: { unit:'in', format:'letter', orientation:'portrait' },
+    pagebreak: { mode: ['css','legacy'] }
+  };
+  try{
+    html2pdf().set(opt).from(el).save()
+      .then(()=>{ el.classList.remove('printing'); })
+      .catch((err)=>{
+        el.classList.remove('printing');
+        console.warn('html2pdf falló, usando impresión nativa como respaldo', err);
+        alert('No se pudo generar el PDF automáticamente. Se abrirá el diálogo de impresión: elige "Guardar como PDF" (o la impresora PDF de tu dispositivo).');
+        window.print();
+      });
+  }catch(err){
+    el.classList.remove('printing');
+    console.warn('html2pdf no disponible, usando impresión nativa', err);
+    alert('No se pudo generar el PDF automáticamente. Se abrirá el diálogo de impresión: elige "Guardar como PDF" (o la impresora PDF de tu dispositivo).');
+    window.print();
+  }
+}
+
+function enviarEmail(){
+  const d = collectData();
+  exportPdf();
+  const subject = encodeURIComponent('Guía de Remisión '+d.folio+' — Tecknologistic');
+  const body = encodeURIComponent(
+    'Guía de Remisión: '+d.folio+'\n'+
+    'Fecha: '+d.fecha+' '+d.hora+'\n'+
+    'Conductor: '+d.conductor+' | Placa: '+d.placa+'\n'+
+    'Ruta: '+d.partida+' → '+d.llegada+'\n'+
+    'Volumen despachado (contador): '+d.volContador+'\n'+
+    'Volumen varillado total: '+d.varilladoTotal+'\n'+
+    'Variación: '+d.variacion+'\n'+
+    'Estado: '+d.estado+'\n\n'+
+    'Se ha descargado el PDF de esta guía — por favor adjúntalo manualmente a este correo antes de enviarlo.'
+  );
+  setTimeout(()=>{ window.location.href = 'mailto:?subject='+subject+'&body='+body; }, 600);
+}
+
+setStatus('none');
+actualizarNotaConsolidado();
+// Autoinicio: asigna número y fecha automáticamente al abrir el documento
+nuevaGuia();
+</script>
+</body>
+</html>
